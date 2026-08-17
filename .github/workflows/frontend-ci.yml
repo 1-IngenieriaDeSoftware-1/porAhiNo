@@ -1,0 +1,56 @@
+name: Frontend CI
+
+# Dispara en Pull Requests y push a main
+# SOLO cuando hay cambios dentro de /frontend
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  ci:
+    name: Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js LTS con caché de npm
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+
+      # 3. Instalar dependencias de forma reproducible
+      - name: Instalar dependencias
+        run: npm ci
+
+      # 4. Ejecutar ESLint (linter de TypeScript/React)
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      # 5. Verificar tipos TypeScript
+      - name: Type check
+        run: npm run type-check
+
+      # 6. Build de producción de Next.js
+      # Falla si hay errores de compilación
+      - name: Build (next build)
+        run: npm run build
+        env:
+          # Variable requerida por Next.js para el build
+          # El valor puede ser un placeholder en CI
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1' }}
