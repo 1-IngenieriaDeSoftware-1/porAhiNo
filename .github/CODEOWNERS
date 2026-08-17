@@ -1,0 +1,33 @@
+# =============================================================================
+# CODEOWNERS - porAhiNo
+# =============================================================================
+# Este archivo define quién debe revisar automáticamente los Pull Requests
+# según qué carpetas o archivos modifica el PR.
+#
+# INSTRUCCIONES PARA EL EQUIPO:
+# Reemplaza los placeholders por los usernames REALES de GitHub de cada integrante.
+# Ejemplo: @usuario-github-1 -> @juanperez2024
+#
+# Formato: <patrón de archivo/carpeta>   <@dueño1> <@dueño2>
+# GitHub asignará automáticamente esas personas como reviewers en cada PR.
+# =============================================================================
+
+# --- Revisor general (revisa CUALQUIER cambio en el repo) ---
+# Reemplaza por el GitHub username del integrante 3 (revisor general / líder técnico)
+*   @usuario-github-3
+
+# --- Frontend (Next.js / TypeScript) ---
+# Reemplaza por el GitHub username del integrante responsable del frontend
+/frontend/   @usuario-github-1
+
+# --- Backend (FastAPI / Python) ---
+# Reemplaza por el GitHub username del integrante responsable del backend
+/backend/    @usuario-github-2
+
+# --- Archivos de CI/CD y configuración del repo ---
+# El revisor general revisa los workflows y configuración de GitHub
+/.github/    @usuario-github-3
+
+# --- Documentación raíz ---
+/README.md              @usuario-github-3
+/README-CONTRIBUTING.md @usuario-github-3
