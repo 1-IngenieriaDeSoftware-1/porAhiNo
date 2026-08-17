@@ -1,0 +1,90 @@
+name: Backend CI
+
+# Dispara en Pull Requests y push a main
+# SOLO cuando hay cambios dentro de /backend
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  ci:
+    name: Lint, Test & Verify
+    runs-on: ubuntu-latest
+
+    # Servicio de PostgreSQL para pruebas de integración
+    # Levanta un contenedor de Postgres junto al runner de CI
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: porAhiNo_test_user
+          POSTGRES_PASSWORD: porAhiNo_test_pass
+          POSTGRES_DB: porAhiNo_test_db
+        ports:
+          - 5432:5432
+        # Esperar a que Postgres esté listo antes de continuar
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # 1. Descargar el código
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Python 3.11
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. Cachear dependencias de pip para acelerar el pipeline
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4. Instalar dependencias del backend
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      # 5. Linter con Ruff (más rápido que flake8, cubre PEP8 + isort + más)
+      # Si el equipo prefiere flake8, reemplazar por: pip install flake8 && flake8 app/
+      - name: Lint (Ruff)
+        run: |
+          pip install ruff
+          ruff check app/
+
+      # 6. Ejecutar tests con pytest (si existe la carpeta /tests)
+      - name: Tests (pytest)
+        run: |
+          if [ -d "tests" ] && [ "$(ls -A tests/*.py 2>/dev/null)" ]; then
+            pytest tests/ -v --tb=short
+          else
+            echo "No hay tests implementados aún. Saltando pytest."
+            echo "Agrega tests en backend/tests/ para que este paso se ejecute."
+          fi
+        env:
+          # Variables de entorno para conectar al PostgreSQL de servicio
+          DATABASE_URL: postgresql+asyncpg://porAhiNo_test_user:porAhiNo_test_pass@localhost:5432/porAhiNo_test_db
+          DATABASE_URL_SYNC: postgresql://porAhiNo_test_user:porAhiNo_test_pass@localhost:5432/porAhiNo_test_db
+          SECRET_KEY: ci-secret-key-for-testing-only-not-real
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 60
+          ENVIRONMENT: testing
+          DEBUG: 'false'
