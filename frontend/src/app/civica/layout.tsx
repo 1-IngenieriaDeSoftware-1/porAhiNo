@@ -1,3 +1,8 @@
+/**
+ * Ruta aislada: propuesta académica Cívica (Metro de Medellín).
+ * No forma parte del SRS de porAhiNo (Pico y Placa). Se mantiene fuera del AppShell.
+ */
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

@@ -6,15 +6,24 @@ Optimizado para respuesta en <1 segundo (lógica en service, schema solo valida)
 """
 
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import List, Optional
+
+from pydantic import BaseModel, field_validator
+
+from app.core.placa import validar_placa
 
 
 class ConsultaRequest(BaseModel):
-    """Entrada para consultar restricción de Pico y Placa."""
-    placa: str                          # Placa del vehículo
-    municipio_id: int                   # ID del municipio a consultar
-    fecha_hora: Optional[datetime] = None  # Si None, usa fecha/hora actual Colombia
+    """Entrada para consultar restricción de Pico y Placa (US-002)."""
+
+    placa: str
+    municipio_id: int
+    fecha_hora: Optional[datetime] = None
+
+    @field_validator("placa")
+    @classmethod
+    def normalizar_y_validar_placa(cls, v: str) -> str:
+        return validar_placa(v)
 
 
 class RestriccionDetalle(BaseModel):

@@ -1,70 +1,89 @@
 """
 Router: Administración de Decretos (US-004)
 
-Endpoints protegidos con JWT + rol admin.
-
-Endpoints:
-  GET    /api/v1/admin/decretos          — Listar decretos
-  POST   /api/v1/admin/decretos          — Crear decreto
-  GET    /api/v1/admin/decretos/{id}     — Detalle decreto
-  PUT    /api/v1/admin/decretos/{id}     — Actualizar decreto
-  DELETE /api/v1/admin/decretos/{id}     — Eliminar decreto
-  GET    /api/v1/admin/municipios        — Listar municipios
-  POST   /api/v1/admin/municipios        — Crear municipio
+Todos los endpoints exigen JWT + rol admin.
 """
 
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.schemas.decreto import DecretoCreate, DecretoUpdate, DecretoResponse
+from app.core.deps import require_admin
+from app.models.usuario import Usuario
+from app.schemas.decreto import DecretoCreate, DecretoResponse, DecretoUpdate
+from app.schemas.municipio import MunicipioCreate, MunicipioResponse
 from app.services.admin_service import AdminService
 
 router = APIRouter()
 
-# TODO: Agregar dependencia de autorización admin a todos los endpoints
-# Ejemplo: current_user = Depends(require_admin_role)
 
 @router.get("/decretos", response_model=List[DecretoResponse])
-async def listar_decretos(db: AsyncSession = Depends(get_db)):
-    """Lista todos los decretos. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+async def listar_decretos(
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
+):
+    return await AdminService(db).get_decretos()
 
 
 @router.post("/decretos", response_model=DecretoResponse, status_code=status.HTTP_201_CREATED)
-async def crear_decreto(payload: DecretoCreate, db: AsyncSession = Depends(get_db)):
-    """Crea un nuevo decreto de Pico y Placa. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+async def crear_decreto(
+    payload: DecretoCreate,
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
+):
+    return await AdminService(db).create_decreto(payload)
 
 
 @router.get("/decretos/{decreto_id}", response_model=DecretoResponse)
-async def obtener_decreto(decreto_id: int, db: AsyncSession = Depends(get_db)):
-    """Obtiene detalle de un decreto. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+async def obtener_decreto(
+    decreto_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
+):
+    decretos = await AdminService(db).get_decretos()
+    match = next((item for item in decretos if item.id == decreto_id), None)
+    if match is None:
+        from app.core.exceptions import NotFoundError
+
+        raise NotFoundError("Decreto no encontrado")
+    return match
 
 
 @router.put("/decretos/{decreto_id}", response_model=DecretoResponse)
 async def actualizar_decreto(
-    decreto_id: int, payload: DecretoUpdate, db: AsyncSession = Depends(get_db)
+    decreto_id: int,
+    payload: DecretoUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
 ):
-    """Actualiza un decreto existente. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+    return await AdminService(db).update_decreto(decreto_id, payload)
 
 
 @router.delete("/decretos/{decreto_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def eliminar_decreto(decreto_id: int, db: AsyncSession = Depends(get_db)):
-    """Elimina un decreto. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+async def eliminar_decreto(
+    decreto_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
+):
+    await AdminService(db).delete_decreto(decreto_id)
 
 
-@router.get("/municipios")
-async def listar_municipios_admin(db: AsyncSession = Depends(get_db)):
-    """Lista todos los municipios registrados. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+@router.get("/municipios", response_model=List[MunicipioResponse])
+async def listar_municipios_admin(
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
+):
+    return await AdminService(db).get_municipios()
 
 
-@router.post("/municipios", status_code=status.HTTP_201_CREATED)
-async def crear_municipio(db: AsyncSession = Depends(get_db)):
-    """Crea un nuevo municipio. Solo admins."""
-    raise HTTPException(status_code=501, detail="Not implemented yet")
+@router.post("/municipios", response_model=MunicipioResponse, status_code=status.HTTP_201_CREATED)
+async def crear_municipio(
+    payload: MunicipioCreate,
+    db: AsyncSession = Depends(get_db),
+    _: Usuario = Depends(require_admin),
+):
+    return await AdminService(db).create_municipio(
+        payload.nombre, payload.departamento, payload.codigo_dane
+    )

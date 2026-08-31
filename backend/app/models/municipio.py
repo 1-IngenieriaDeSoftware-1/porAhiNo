@@ -21,6 +21,7 @@ class Municipio(Base):
 
     # Relaciones
     decretos = relationship("Decreto", back_populates="municipio")
+    consultas = relationship("Consulta", back_populates="municipio")
 
     def __repr__(self) -> str:
         return f"<Municipio {self.nombre}, {self.departamento}>"
