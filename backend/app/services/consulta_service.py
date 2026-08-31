@@ -41,14 +41,14 @@ class ConsultaService:
           4. Registrar consulta en historial (async, no bloquear respuesta)
           5. Retornar ConsultaResponse con mensaje legible
         """
-        raise NotImplementedError
+        raise NotImplementedError("Consulta de restricción pendiente (US-002)")
 
     async def get_municipios_activos(self) -> List[Municipio]:
         """
-        Retorna municipios que tienen al menos un decreto activo.
+        Retorna municipios que tienen al menos un decreto activo (US-003).
         TODO: JOIN municipios + decretos WHERE is_active = True
         """
-        raise NotImplementedError
+        raise NotImplementedError("Listado de municipios pendiente (US-003)")
 
     def _calcular_restriccion(self, placa: str, decreto: Decreto, fecha_hora: datetime) -> bool:
         """
