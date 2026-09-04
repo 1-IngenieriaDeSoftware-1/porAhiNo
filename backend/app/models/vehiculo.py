@@ -6,12 +6,11 @@ La placa se valida con formato colombiano (AAA000 o ABC12D).
 """
 
 import enum
-from datetime import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.core.database import Base
+from app.core.base import Base
 
 
 class TipoVehiculo(str, enum.Enum):
@@ -27,9 +26,11 @@ class Vehiculo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     placa = Column(String(10), nullable=False, index=True)  # Formato: ABC123 o ABC12D
-    tipo = Column(SAEnum(TipoVehiculo), default=TipoVehiculo.PARTICULAR, nullable=False)
+    tipo = Column(SAEnum(TipoVehiculo, native_enum=False, length=20), default=TipoVehiculo.PARTICULAR, nullable=False)
     alias = Column(String(100), nullable=True)  # Nombre amigable (ej: "Mi carro")
-    id_usuario = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    id_usuario = Column(
+        Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relaciones

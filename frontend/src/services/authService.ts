@@ -1,57 +1,24 @@
-/**
- * Servicio Frontend: Autenticación
- *
- * Endpoints que consume:
- *   POST /api/v1/auth/register → registro
- *   POST /api/v1/auth/login    → login
- *   GET  /api/v1/auth/me       → getMe
- *
- * TODO: Implementar almacenamiento seguro del JWT
- * (HttpOnly cookie es más seguro que localStorage)
- */
-
 import apiClient from './apiClient';
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
-export interface UsuarioResponse {
-  id: number;
-  email: string;
-  rol: 'conductor' | 'admin';
-  is_active: boolean;
-  created_at: string;
-}
-
+import type { LoginRequestAPI, TokenResponseAPI, UsuarioAPI } from '@/types/api';
 
 const authService = {
-  async login(payload: LoginRequest): Promise<TokenResponse> {
-    const { data } = await apiClient.post<TokenResponse>('/auth/login', payload);
-    // TODO: Guardar token de forma segura
+  async login(payload: LoginRequestAPI): Promise<TokenResponseAPI> {
+    const { data } = await apiClient.post<TokenResponseAPI>('/auth/login', payload);
     return data;
   },
 
-  async registro(email: string, password: string): Promise<UsuarioResponse> {
-    const { data } = await apiClient.post<UsuarioResponse>('/auth/register', { email, password });
+  async registro(email: string, password: string): Promise<UsuarioAPI> {
+    const { data } = await apiClient.post<UsuarioAPI>('/auth/register', { email, password });
     return data;
   },
 
-  async getMe(): Promise<UsuarioResponse> {
-    const { data } = await apiClient.get<UsuarioResponse>('/auth/me');
+  async getMe(): Promise<UsuarioAPI> {
+    const { data } = await apiClient.get<UsuarioAPI>('/auth/me');
     return data;
   },
 
   logout(): void {
-    // TODO: Limpiar token del almacenamiento
-    // localStorage.removeItem('access_token');
+    /* El token se limpia en AuthProvider */
   },
 };
 

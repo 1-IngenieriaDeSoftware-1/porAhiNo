@@ -8,7 +8,7 @@ Se usa como catálogo de referencia para decretos y consultas.
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.core.database import Base
+from app.core.base import Base
 
 
 class Municipio(Base):
@@ -21,6 +21,7 @@ class Municipio(Base):
 
     # Relaciones
     decretos = relationship("Decreto", back_populates="municipio")
+    consultas = relationship("Consulta", back_populates="municipio")
 
     def __repr__(self) -> str:
         return f"<Municipio {self.nombre}, {self.departamento}>"

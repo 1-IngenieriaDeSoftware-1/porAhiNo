@@ -7,12 +7,11 @@ Cumplimiento Ley 1581 de 2012 — datos personales mínimos necesarios.
 """
 
 import enum
-from datetime import datetime
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.core.database import Base
+from app.core.base import Base
 
 
 class RolUsuario(str, enum.Enum):
@@ -26,7 +25,7 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
-    rol = Column(SAEnum(RolUsuario), default=RolUsuario.CONDUCTOR, nullable=False)
+    rol = Column(SAEnum(RolUsuario, native_enum=False, length=20), default=RolUsuario.CONDUCTOR, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

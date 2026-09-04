@@ -23,7 +23,7 @@ class VehiculoService:
         Lista los vehículos de un usuario.
         TODO: SELECT * FROM vehiculos WHERE id_usuario = usuario_id
         """
-        raise NotImplementedError
+        raise NotImplementedError("Listado de vehículos pendiente (US-001 / US-006)")
 
     async def create(self, payload: VehiculoCreate, usuario_id: int) -> Vehiculo:
         """
@@ -33,19 +33,19 @@ class VehiculoService:
           2. Crear instancia Vehiculo
           3. Agregar a la sesión y commit
         """
-        raise NotImplementedError
+        raise NotImplementedError("Registro de vehículo pendiente (US-001)")
 
     async def get_by_id(self, vehiculo_id: int, usuario_id: int) -> Vehiculo:
         """
         Obtiene un vehículo por ID, verificando que pertenece al usuario.
         TODO: Agregar control de acceso
         """
-        raise NotImplementedError
+        raise NotImplementedError("Detalle de vehículo pendiente (US-001)")
 
     async def update(self, vehiculo_id: int, payload: VehiculoUpdate, usuario_id: int) -> Vehiculo:
         """TODO: Actualizar alias y/o tipo del vehículo."""
-        raise NotImplementedError
+        raise NotImplementedError("Actualización de vehículo pendiente (US-001)")
 
     async def delete(self, vehiculo_id: int, usuario_id: int) -> None:
         """TODO: Eliminar vehículo verificando pertenencia al usuario."""
-        raise NotImplementedError
+        raise NotImplementedError("Eliminación de vehículo pendiente (US-001)")

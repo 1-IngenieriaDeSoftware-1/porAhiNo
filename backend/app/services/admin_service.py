@@ -25,7 +25,7 @@ class AdminService:
 
     async def get_decretos(self, municipio_id: Optional[int] = None) -> List[Decreto]:
         """TODO: Listar decretos, opcionalmente filtrar por municipio."""
-        raise NotImplementedError
+        raise NotImplementedError("Listado de decretos pendiente (US-004)")
 
     async def create_decreto(self, payload: DecretoCreate) -> Decreto:
         """
@@ -35,22 +35,22 @@ class AdminService:
           2. Verificar solapamiento de fechas con decretos existentes
           3. Crear y persistir el decreto
         """
-        raise NotImplementedError
+        raise NotImplementedError("Creación de decreto pendiente (US-004)")
 
     async def update_decreto(self, decreto_id: int, payload: DecretoUpdate) -> Decreto:
-        """TODO: Actualizar decreto existente."""
-        raise NotImplementedError
+        """TODO: Actualizar decreto existente. Las consultas futuras deben ver el cambio de inmediato (AC-005)."""
+        raise NotImplementedError("Actualización de decreto pendiente (US-004)")
 
     async def delete_decreto(self, decreto_id: int) -> None:
-        """TODO: Eliminar o desactivar decreto (soft delete recomendado)."""
-        raise NotImplementedError
+        """TODO: Soft delete (is_active=False) para no romper historial."""
+        raise NotImplementedError("Eliminación de decreto pendiente (US-004)")
 
     # --- Municipios ---
 
     async def get_municipios(self) -> List[Municipio]:
         """TODO: Listar todos los municipios."""
-        raise NotImplementedError
+        raise NotImplementedError("Listado de municipios pendiente (US-004)")
 
     async def create_municipio(self, nombre: str, departamento: str, codigo_dane: str = None) -> Municipio:
         """TODO: Crear nuevo municipio. Validar que no exista duplicado."""
-        raise NotImplementedError
+        raise NotImplementedError("Creación de municipio pendiente (US-004)")
