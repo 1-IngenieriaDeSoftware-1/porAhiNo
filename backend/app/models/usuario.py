@@ -32,6 +32,7 @@ class Usuario(Base):
 
     # Relaciones
     vehiculos = relationship("Vehiculo", back_populates="usuario", cascade="all, delete-orphan")
+    consultas = relationship("Consulta", back_populates="usuario")
 
     def __repr__(self) -> str:
         return f"<Usuario id={self.id} email={self.email} rol={self.rol}>"
