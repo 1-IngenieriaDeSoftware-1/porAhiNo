@@ -15,7 +15,7 @@ class DecretoCreate(BaseModel):
     descripcion: Optional[str] = None
     hora_inicio: time
     hora_fin: time
-    dias_restriccion: str   # ej: "1,2,3,4,5" (Lun-Vie)
+    dias_restriccion: str  # 0=Lunes ... 6=Domingo, ej: "0,1,2,3,4"
     digitos_restringidos: str  # ej: "1,2"
     vigencia_desde: date
     vigencia_hasta: Optional[date] = None
