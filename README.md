@@ -88,6 +88,8 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 # US-DB-02 — catálogo Bogotá / Medellín / Cali (idempotente)
 python -m scripts.seed_municipios
+# US-DB-03 — decretos de ejemplo (horas, dígitos, vigencia; idempotente)
+python -m scripts.seed_decretos
 ```
 
 Admin de desarrollo: `admin@porahino.co` / `Admin1234`.
