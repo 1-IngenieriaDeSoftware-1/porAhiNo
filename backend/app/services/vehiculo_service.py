@@ -1,15 +1,18 @@
 """
-Servicio: Gestión de Vehículos (US-001, US-006).
+Servicio: Gestión de Vehículos (US-001, US-006, US-DB-04).
 
-Responsabilidades:
-- CRUD de vehículos del usuario
-- Validación de placa colombiana (complementa schema Pydantic)
-- Verificar que el usuario no supere el límite de vehículos (regla de negocio)
+La persistencia (insertar, unique por usuario+placa, listar los del dueño)
+queda aquí. Update/delete de negocio siguen en US-001.
 """
 
 from typing import List
+
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import ConflictError
+from app.core.placa import validar_placa
 from app.models.vehiculo import Vehiculo
 from app.schemas.vehiculo import VehiculoCreate, VehiculoUpdate
 
@@ -19,27 +22,40 @@ class VehiculoService:
         self.db = db
 
     async def get_by_usuario(self, usuario_id: int) -> List[Vehiculo]:
-        """
-        Lista los vehículos de un usuario.
-        TODO: SELECT * FROM vehiculos WHERE id_usuario = usuario_id
-        """
-        raise NotImplementedError("Listado de vehículos pendiente (US-001 / US-006)")
+        result = await self.db.execute(
+            select(Vehiculo)
+            .where(Vehiculo.id_usuario == usuario_id)
+            .order_by(Vehiculo.created_at.desc())
+        )
+        return list(result.scalars().all())
 
     async def create(self, payload: VehiculoCreate, usuario_id: int) -> Vehiculo:
-        """
-        Registra un nuevo vehículo.
-        TODO:
-          1. Verificar que la placa no está duplicada para el usuario
-          2. Crear instancia Vehiculo
-          3. Agregar a la sesión y commit
-        """
-        raise NotImplementedError("Registro de vehículo pendiente (US-001)")
+        placa = validar_placa(payload.placa)
+        duplicado = await self.db.execute(
+            select(Vehiculo.id).where(
+                Vehiculo.id_usuario == usuario_id,
+                Vehiculo.placa == placa,
+            )
+        )
+        if duplicado.scalar_one_or_none() is not None:
+            raise ConflictError("Ya tienes un vehículo con esa placa")
+
+        vehiculo = Vehiculo(
+            placa=placa,
+            tipo=payload.tipo,
+            alias=payload.alias,
+            id_usuario=usuario_id,
+        )
+        self.db.add(vehiculo)
+        try:
+            await self.db.flush()
+        except IntegrityError as exc:
+            raise ConflictError("Ya tienes un vehículo con esa placa") from exc
+        await self.db.refresh(vehiculo)
+        return vehiculo
 
     async def get_by_id(self, vehiculo_id: int, usuario_id: int) -> Vehiculo:
-        """
-        Obtiene un vehículo por ID, verificando que pertenece al usuario.
-        TODO: Agregar control de acceso
-        """
+        """TODO: Agregar control de acceso."""
         raise NotImplementedError("Detalle de vehículo pendiente (US-001)")
 
     async def update(self, vehiculo_id: int, payload: VehiculoUpdate, usuario_id: int) -> Vehiculo:
