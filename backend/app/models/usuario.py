@@ -7,7 +7,6 @@ Cumplimiento Ley 1581 de 2012 — datos personales mínimos necesarios.
 """
 
 import enum
-from datetime import datetime
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
