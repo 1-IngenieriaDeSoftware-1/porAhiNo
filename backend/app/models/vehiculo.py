@@ -6,7 +6,6 @@ La placa se valida con formato colombiano (AAA000 o ABC12D).
 """
 
 import enum
-from datetime import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func

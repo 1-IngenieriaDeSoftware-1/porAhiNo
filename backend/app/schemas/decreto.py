@@ -5,7 +5,7 @@ Usado principalmente por el panel de administración (US-004).
 """
 
 from datetime import date, time
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseModel
 
 

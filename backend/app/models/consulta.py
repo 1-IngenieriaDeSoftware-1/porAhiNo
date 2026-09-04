@@ -7,7 +7,6 @@ Opcional para Release 1 — activar en Release 2 junto con módulo de alertas.
 TODO (Release 2): Usar para personalizar alertas preventivas (US-005).
 """
 
-from datetime import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
