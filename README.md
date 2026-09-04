@@ -52,7 +52,9 @@ La consulta (US-002) es **pública**. Guardar vehículos y administrar decretos 
 
 ## Arranque local
 
-**Requisitos:** Node.js 18+, Python 3.11+, Docker, Git.
+**Requisitos:** Node.js 18+, Python 3.11+, Docker Desktop, Git.
+
+La base de datos **solo corre en un contenedor local**. No hay Postgres en la nube todavía: se desplegará cuando el producto esté casi listo.
 
 ```bash
 git clone https://github.com/1-IngenieriaDeSoftware-1/porAhiNo.git
@@ -60,7 +62,7 @@ cd porAhiNo
 docker compose up -d
 ```
 
-PostgreSQL: `localhost:5432` (usuario/clave/bd por defecto en `docker-compose.yml`).
+PostgreSQL queda en `127.0.0.1:5432` (usuario `porAhiNo_user`, clave `porAhiNo_pass`, bd `porAhiNo_db`).
 
 ### Backend
 
@@ -71,14 +73,18 @@ python -m venv .venv
 # Windows: .venv\Scripts\activate
 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-alembic upgrade head
-python -m scripts.seed_municipios
+
+# US-DB-01 — esquema (espera a que el contenedor esté healthy)
+python -m scripts.migrate
+# equivalente: alembic upgrade head
+# revertir: alembic downgrade base
+
 uvicorn app.main:app --reload --port 8000
 ```
 
 - API: http://localhost:8000  
 - OpenAPI: http://localhost:8000/docs  
-- Admin de desarrollo (seed): `admin@porahino.co` / `Admin1234`
+- Catálogo de municipios (seed): siguiente historia US-DB-02
 
 ### Frontend
 

@@ -7,22 +7,19 @@ Contiene los dígitos de placa restringidos, horarios y días de vigencia.
 Índices en municipio_id + vigencia_desde/hasta para consultas en <1 segundo.
 """
 
-import enum
-from datetime import date, time
-from sqlalchemy import (
-    Column, Integer, String, ForeignKey, Date, Time,
-    ARRAY, Boolean, Text, Index
-)
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Index, Integer, String, Text, Time
 from sqlalchemy.orm import relationship
 
-from app.core.database import Base
+from app.core.base import Base
 
 
 class Decreto(Base):
     __tablename__ = "decretos"
 
     id = Column(Integer, primary_key=True, index=True)
-    municipio_id = Column(Integer, ForeignKey("municipios.id"), nullable=False, index=True)
+    municipio_id = Column(
+        Integer, ForeignKey("municipios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
 
     # Referencia legal
     numero_decreto = Column(String(50), nullable=True)

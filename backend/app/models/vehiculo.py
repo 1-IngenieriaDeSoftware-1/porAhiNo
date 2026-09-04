@@ -11,7 +11,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum as SA
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.core.database import Base
+from app.core.base import Base
 
 
 class TipoVehiculo(str, enum.Enum):
@@ -29,7 +29,9 @@ class Vehiculo(Base):
     placa = Column(String(10), nullable=False, index=True)  # Formato: ABC123 o ABC12D
     tipo = Column(SAEnum(TipoVehiculo, native_enum=False, length=20), default=TipoVehiculo.PARTICULAR, nullable=False)
     alias = Column(String(100), nullable=True)  # Nombre amigable (ej: "Mi carro")
-    id_usuario = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    id_usuario = Column(
+        Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relaciones
