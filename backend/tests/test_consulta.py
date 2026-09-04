@@ -1,25 +1,9 @@
 """
-Tests: Servicio de consulta de Pico y Placa
+Tests: Servicio de consulta de Pico y Placa (US-002).
 
-Prueba la lógica pura de verificación de restricción.
-Ejecución: pytest backend/tests/ -v
+Cuando ConsultaService._calcular_restriccion esté listo, cubrir:
+- Placa restringida en horario → tiene_restriccion=True (AC-003)
+- Placa sin restricción → False (AC-004)
+- Fin de semana / fuera de horario → False
+- Municipio sin decreto activo → False
 """
-
-import pytest
-from datetime import datetime
-
-# from app.services.consulta_service import ConsultaService
-
-
-class TestConsultaService:
-    """
-    TODO: Implementar tests cuando ConsultaService esté listo.
-
-    Casos de prueba sugeridos:
-    - Placa restringida en horario de restricción → tiene_restriccion=True
-    - Placa no restringida → tiene_restriccion=False
-    - Consulta en fin de semana (si aplica) → False
-    - Consulta fuera de horario → False
-    - Municipio sin decreto activo → False
-    """
-    pass

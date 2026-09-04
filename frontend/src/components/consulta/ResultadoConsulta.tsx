@@ -1,22 +1,10 @@
-/**
- * Componente: ResultadoConsulta
- *
- * Muestra el resultado de una consulta de Pico y Placa.
- * Dos estados: restringido (rojo) o libre (verde).
- *
- * TODO: Recibir props de ConsultaResponse del backend
- */
+'use client';
 
 import Card from '@/components/ui/Card';
+import type { ConsultaResponseAPI } from '@/types/api';
 
 interface ResultadoConsultaProps {
-  // TODO: Tipar con ConsultaResponse del types/api.ts
-  resultado?: {
-    placa: string;
-    municipio: string;
-    tiene_restriccion: boolean;
-    mensaje: string;
-  };
+  resultado?: ConsultaResponseAPI | null;
 }
 
 export default function ResultadoConsulta({ resultado }: ResultadoConsultaProps) {
@@ -29,19 +17,15 @@ export default function ResultadoConsulta({ resultado }: ResultadoConsultaProps)
       className={resultado.tiene_restriccion ? 'border-red-200' : 'border-green-200'}
     >
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-4xl">
+        <span className="text-4xl" aria-hidden>
           {resultado.tiene_restriccion ? '🚫' : '✅'}
         </span>
         <div>
           <p className="font-bold text-xl text-gray-900">{resultado.placa}</p>
           <p className="text-gray-500 text-sm">{resultado.municipio}</p>
         </div>
-        <span
-          className={`ml-auto ${
-            resultado.tiene_restriccion ? 'badge-restringido' : 'badge-libre'
-          }`}
-        >
-          {resultado.tiene_restriccion ? 'Restringido' : 'Libre'}
+        <span className={`ml-auto ${resultado.tiene_restriccion ? 'badge-restringido' : 'badge-libre'}`}>
+          {resultado.tiene_restriccion ? 'Pico y Placa Activo' : 'Sin restricción'}
         </span>
       </div>
       <p className="text-gray-700">{resultado.mensaje}</p>

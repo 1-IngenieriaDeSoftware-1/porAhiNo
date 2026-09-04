@@ -4,15 +4,12 @@ Schemas Pydantic: Vehiculo
 Valida el formato de placa colombiana (AAA000 o ABC12D).
 """
 
-import re
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, field_validator
 
+from app.core.placa import validar_placa
 from app.models.vehiculo import TipoVehiculo
-
-# Regex placa colombiana: 3 letras + 3 dígitos (particular/carga) o 3 letras + 2 dígitos + 1 letra (moto)
-PLACA_REGEX = re.compile(r'^[A-Z]{3}[0-9]{2}[A-Z0-9]$')
 
 
 class VehiculoCreate(BaseModel):
@@ -22,13 +19,8 @@ class VehiculoCreate(BaseModel):
 
     @field_validator("placa")
     @classmethod
-    def validar_placa(cls, v: str) -> str:
-        placa = v.upper().strip()
-        if not PLACA_REGEX.match(placa):
-            raise ValueError(
-                "Formato de placa inválido. Use formato colombiano: ABC123 o ABC12D"
-            )
-        return placa
+    def normalizar_y_validar_placa(cls, v: str) -> str:
+        return validar_placa(v)
 
 
 class VehiculoUpdate(BaseModel):

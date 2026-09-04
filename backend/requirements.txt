@@ -24,10 +24,10 @@ python-multipart==0.0.9
 
 # Utilities
 python-dotenv==1.0.1
-httpx==0.27.0             # HTTP client (tests, external APIs)
-pytz==2024.1              # Zonas horarias Colombia
+httpx==0.27.0
+tzdata==2024.1
 
 # Development / Testing
 pytest==8.2.0
 pytest-asyncio==0.23.6
-httpx==0.27.0
+ruff==0.4.8
