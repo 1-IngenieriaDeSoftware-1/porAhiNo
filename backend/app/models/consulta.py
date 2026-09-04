@@ -1,13 +1,11 @@
 """
 Modelo SQLAlchemy: Consulta (Historial)
 
-Registra el historial de consultas de restricción realizadas por los usuarios.
-Opcional para Release 1 — activar en Release 2 junto con módulo de alertas.
-
-TODO (Release 2): Usar para personalizar alertas preventivas (US-005).
+Registra cada consulta de restricción (US-DB-05) para auditoría y alertas (US-005).
+Las consultas anónimas se guardan con id_usuario e id_vehiculo en NULL.
 """
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -29,6 +27,7 @@ class Consulta(Base):
     resultado_restringido = Column(Boolean, nullable=False)
 
     vehiculo = relationship("Vehiculo", back_populates="consultas")
+    usuario = relationship("Usuario", back_populates="consultas")
     municipio = relationship("Municipio", back_populates="consultas")
 
     def __repr__(self) -> str:
