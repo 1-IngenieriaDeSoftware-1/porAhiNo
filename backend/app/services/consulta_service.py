@@ -15,9 +15,10 @@ Algoritmo de consulta:
   6. Retornar resultado con mensaje legible
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional
 
+from sqlalchemy import Select, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.placa import validar_placa
@@ -26,6 +27,19 @@ from app.models.consulta import Consulta
 from app.models.decreto import Decreto
 from app.models.municipio import Municipio
 from app.schemas.consulta import ConsultaRequest, ConsultaResponse
+
+
+def decretos_vigentes_stmt(municipio_id: int, fecha: date) -> Select:
+    """SELECT indexado: municipio + vigencia + activos (US-DB-06)."""
+    return (
+        select(Decreto)
+        .where(
+            Decreto.municipio_id == municipio_id,
+            Decreto.is_active.is_(True),
+            Decreto.vigencia_desde <= fecha,
+            or_(Decreto.vigencia_hasta.is_(None), Decreto.vigencia_hasta >= fecha),
+        )
+    )
 
 
 class ConsultaService:
@@ -39,8 +53,7 @@ class ConsultaService:
 
         TODO:
           1. Obtener fecha/hora actual Colombia (America/Bogota) si no se provee
-          2. Buscar decretos vigentes para el municipio
-             (usar índice ix_decretos_municipio_vigencia)
+          2. Buscar decretos vigentes (buscar_decretos_vigentes / índice)
           3. Aplicar algoritmo de verificación de dígitos
           4. Registrar consulta en historial (registrar_historial)
           5. Retornar ConsultaResponse con mensaje legible
@@ -53,6 +66,14 @@ class ConsultaService:
         TODO: JOIN municipios + decretos WHERE is_active = True
         """
         raise NotImplementedError("Listado de municipios pendiente (US-003)")
+
+    async def buscar_decretos_vigentes(
+        self, municipio_id: int, fecha: Optional[date] = None
+    ) -> List[Decreto]:
+        """Decretos activos vigentes para un municipio/fecha. Objetivo < 1 s."""
+        dia = fecha or ahora_colombia().date()
+        result = await self.db.execute(decretos_vigentes_stmt(municipio_id, dia))
+        return list(result.scalars().all())
 
     async def registrar_historial(
         self,
