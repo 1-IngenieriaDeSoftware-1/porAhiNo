@@ -1,10 +1,11 @@
 """
-Modelo: Alerta preventiva (US-005) — Release 2.
+Modelo: suscripción de alerta preventiva (US-DB-07 / US-005).
 
-Tabla reservada. No se usa en el MVP (R1).
+Un conductor se suscribe por vehículo con minutos de anticipación.
+is_active es soft-delete: no se borra la fila.
 """
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -25,5 +26,20 @@ class Alerta(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    usuario = relationship("Usuario")
-    vehiculo = relationship("Vehiculo")
+    usuario = relationship("Usuario", back_populates="alertas")
+    vehiculo = relationship("Vehiculo", back_populates="alertas")
+
+    __table_args__ = (
+        UniqueConstraint("id_usuario", "id_vehiculo", name="uq_alertas_usuario_vehiculo"),
+        CheckConstraint("minutos_antes > 0", name="ck_alertas_minutos_antes"),
+    )
+
+    def desactivar(self) -> None:
+        """Baja la suscripción sin borrar la fila (US-DB-07)."""
+        self.is_active = False
+
+    def __repr__(self) -> str:
+        return (
+            f"<Alerta usuario={self.id_usuario} vehiculo={self.id_vehiculo} "
+            f"minutos={self.minutos_antes} active={self.is_active}>"
+        )
