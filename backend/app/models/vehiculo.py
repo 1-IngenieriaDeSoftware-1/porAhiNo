@@ -36,6 +36,7 @@ class Vehiculo(Base):
     # Relaciones
     usuario = relationship("Usuario", back_populates="vehiculos")
     consultas = relationship("Consulta", back_populates="vehiculo")
+    alertas = relationship("Alerta", back_populates="vehiculo", cascade="all, delete-orphan")
 
     __table_args__ = (
         UniqueConstraint("id_usuario", "placa", name="uq_vehiculos_usuario_placa"),
