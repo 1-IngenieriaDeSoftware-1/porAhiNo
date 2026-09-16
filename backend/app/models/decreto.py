@@ -7,7 +7,7 @@ Contiene los dígitos de placa restringidos, horarios y días de vigencia.
 Índices en municipio_id + vigencia_desde/hasta para consultas en <1 segundo.
 """
 
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Index, Integer, String, Text, Time
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Index, Integer, String, Text, Time, text
 from sqlalchemy.orm import relationship
 
 from app.core.base import Base
@@ -45,9 +45,16 @@ class Decreto(Base):
     # Relaciones
     municipio = relationship("Municipio", back_populates="decretos")
 
-    # Índice compuesto para optimizar consultas de restricción en <1 segundo
+    # REQ-NFUNC-001 / US-DB-06: lookup por municipio + vigencia en <1 s
     __table_args__ = (
         Index("ix_decretos_municipio_vigencia", "municipio_id", "vigencia_desde", "vigencia_hasta"),
+        Index(
+            "ix_decretos_consulta_vigente",
+            "municipio_id",
+            "vigencia_desde",
+            "vigencia_hasta",
+            postgresql_where=text("is_active = true"),
+        ),
     )
 
     def lista_dias(self) -> list[int]:
