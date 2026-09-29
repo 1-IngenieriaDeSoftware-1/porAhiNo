@@ -61,11 +61,16 @@ class ConsultaService:
         raise NotImplementedError("Consulta de restricción pendiente (US-002)")
 
     async def get_municipios_activos(self) -> List[Municipio]:
-        """
-        Retorna municipios que tienen al menos un decreto activo (US-003).
-        TODO: JOIN municipios + decretos WHERE is_active = True
-        """
-        raise NotImplementedError("Listado de municipios pendiente (US-003)")
+        """Municipios con al menos un decreto is_active (US-003.2)."""
+        stmt = (
+            select(Municipio)
+            .join(Decreto, Decreto.municipio_id == Municipio.id)
+            .where(Decreto.is_active.is_(True))
+            .distinct()
+            .order_by(Municipio.nombre)
+        )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
     async def buscar_decretos_vigentes(
         self, municipio_id: int, fecha: Optional[date] = None
