@@ -96,6 +96,8 @@ uvicorn app.main:app --reload --port 8000
 python -m scripts.seed_municipios
 # US-DB-03 — decretos de ejemplo (horas, dígitos, vigencia; idempotente)
 python -m scripts.seed_decretos
+# BD local de pruebas: desactiva decretos viejos y carga rotación tipo Colombia 2026
+python -m scripts.seed_pruebas
 ```
 
 Admin de desarrollo: `admin@porahino.co` / `Admin1234`.

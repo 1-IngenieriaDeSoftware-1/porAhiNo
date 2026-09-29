@@ -83,7 +83,7 @@ async def test_desactivar_conserva_la_fila() -> None:
             await seed_decretos(session)
             await session.commit()
             decreto = (
-                await session.execute(select(Decreto).where(Decreto.numero_decreto == "SEED-BOG-R1"))
+                await session.execute(select(Decreto).where(Decreto.numero_decreto == "SEED-BOG-LUN"))
             ).scalar_one()
             decreto_id = decreto.id
             decreto.desactivar()
