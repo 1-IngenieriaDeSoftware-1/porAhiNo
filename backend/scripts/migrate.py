@@ -52,6 +52,7 @@ def main() -> None:
     cfg.set_main_option("script_location", str(BACKEND_DIR / "alembic"))
     command.upgrade(cfg, "head")
     print("Migraciones aplicadas (alembic upgrade head).")
+    print("US-DB-08: esquema listo contra Postgres local (Docker, 127.0.0.1:5432).")
 
 
 if __name__ == "__main__":

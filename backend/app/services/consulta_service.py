@@ -170,9 +170,7 @@ class ConsultaService:
         )
 
     async def get_municipios_activos(self) -> List[Municipio]:
-        """
-        Retorna municipios que tienen al menos un decreto activo (US-003).
-        """
+        """Municipios con al menos un decreto is_active (US-003.2)."""
         stmt = (
             select(Municipio)
             .join(Decreto, Decreto.municipio_id == Municipio.id)
@@ -181,14 +179,7 @@ class ConsultaService:
             .order_by(Municipio.nombre)
         )
         result = await self.db.execute(stmt)
-        municipios = list(result.scalars().all())
-        if not municipios:
-            # Fallback para desarrollo si aún no se han asociado decretos
-            result_all = await self.db.execute(
-                select(Municipio).order_by(Municipio.nombre)
-            )
-            municipios = list(result_all.scalars().all())
-        return municipios
+        return list(result.scalars().all())
 
     async def buscar_decretos_vigentes(
         self, municipio_id: int, fecha: Optional[date] = None
