@@ -26,11 +26,32 @@ def test_campos_de_restriccion_completos() -> None:
         assert set(digitos) <= set("0123456789")
 
 
-def test_franjas_medellin_y_cali_son_distintas() -> None:
+def test_cada_ciudad_tiene_rotacion_lun_a_vie() -> None:
+    """Un decreto por día hábil: refleja rotación real (Medellín/Cali) y approx. Bogotá."""
+    for dane in CODIGOS_DANE_R1:
+        items = [item for item in DECRETOS_R1 if item["codigo_dane"] == dane]
+        dias = {item["dias_restriccion"] for item in items}
+        assert dias == {"0", "1", "2", "3", "4"}
+        digitos = {item["digitos_restringidos"] for item in items}
+        assert len(digitos) == 5
+
+
+def test_horarios_por_ciudad() -> None:
+    bog = [item for item in DECRETOS_R1 if item["codigo_dane"] == "11001"]
     med = [item for item in DECRETOS_R1 if item["codigo_dane"] == "05001"]
     cal = [item for item in DECRETOS_R1 if item["codigo_dane"] == "76001"]
-    assert {item["hora_inicio"] for item in med} == {time(5, 0), time(17, 0)}
-    assert {item["hora_inicio"] for item in cal} == {time(6, 0), time(17, 30)}
+    assert all(item["hora_inicio"] == time(6, 0) and item["hora_fin"] == time(21, 0) for item in bog)
+    assert all(item["hora_inicio"] == time(5, 0) and item["hora_fin"] == time(20, 0) for item in med)
+    assert all(item["hora_inicio"] == time(6, 0) and item["hora_fin"] == time(19, 0) for item in cal)
+
+
+def test_medellin_usa_rotacion_2h_2026() -> None:
+    med = {
+        item["dias_restriccion"]: item["digitos_restringidos"]
+        for item in DECRETOS_R1
+        if item["codigo_dane"] == "05001"
+    }
+    assert med == {"0": "5,8", "1": "1,4", "2": "0,2", "3": "3,6", "4": "7,9"}
 
 
 def test_desactivar_es_soft_delete() -> None:
