@@ -1,6 +1,10 @@
-# PostgreSQL 16 en Docker — solo desarrollo local.
+# US-DB-08 — PostgreSQL 16 en Docker (solo desarrollo local).
 # Cuando el producto esté casi listo se despliega a un proveedor en la nube.
-# USO (desde la raíz del repo): docker compose up -d
+#
+# Uso (raíz del repo, con Docker Desktop abierto):
+#   docker compose up -d
+#   docker compose ps          # db = healthy → 127.0.0.1:5432
+# Luego en /backend: python -m scripts.migrate && python -m scripts.check_db
 
 services:
   db:

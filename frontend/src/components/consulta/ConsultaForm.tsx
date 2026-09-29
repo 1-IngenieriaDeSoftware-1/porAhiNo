@@ -26,16 +26,18 @@ export default function ConsultaForm({ onSubmit, loading = false }: ConsultaForm
     consultaService
       .getMunicipios()
       .then((data) => {
-        if (!cancel) setMunicipios(data);
+        if (cancel) return;
+        setMunicipios(data);
+        setAvisoMunicipios(
+          data.length === 0
+            ? 'No hay municipios con decreto activo por ahora.'
+            : null,
+        );
       })
-      .catch((err: { response?: { status?: number } }) => {
+      .catch(() => {
         if (!cancel) {
           setMunicipios([]);
-          setAvisoMunicipios(
-            err.response?.status === 501
-              ? 'El listado de municipios se habilitará con US-003. Mientras tanto puedes dejar el cascarón listo.'
-              : 'No se pudieron cargar los municipios.',
-          );
+          setAvisoMunicipios('No se pudieron cargar los municipios. Intenta de nuevo más tarde.');
         }
       })
       .finally(() => {
