@@ -54,15 +54,20 @@ La consulta (US-002) es **pública**. Guardar vehículos y administrar decretos 
 
 **Requisitos:** Node.js 18+, Python 3.11+, Docker Desktop, Git.
 
-La base de datos **solo corre en un contenedor local**. No hay Postgres en la nube todavía: se desplegará cuando el producto esté casi listo.
+La base de datos **solo corre en un contenedor local** (US-DB-08). No hay Postgres en la nube todavía: se desplegará cuando el producto esté casi listo.
 
 ```bash
 git clone https://github.com/1-IngenieriaDeSoftware-1/porAhiNo.git
 cd porAhiNo
+
+# 1) Abrir Docker Desktop y esperar a que quede en marcha
+# 2) Levantar Postgres 16 (solo localhost:5432)
 docker compose up -d
+docker compose ps   # el servicio db debe verse healthy
 ```
 
-PostgreSQL queda en `127.0.0.1:5432` (usuario `porAhiNo_user`, clave `porAhiNo_pass`, bd `porAhiNo_db`).
+PostgreSQL queda en `127.0.0.1:5432` (usuario `porAhiNo_user`, clave `porAhiNo_pass`, bd `porAhiNo_db`).  
+Bajar el contenedor sin borrar datos: `docker compose stop`. Con volumen: `docker compose down` (el volumen `postgres_data` se conserva salvo `down -v`).
 
 ### Backend
 
@@ -74,8 +79,9 @@ python -m venv .venv
 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 
-# US-DB-01 — esquema (espera a que el contenedor esté healthy)
+# US-DB-01 / US-DB-08 — esquema contra el contenedor
 python -m scripts.migrate
+python -m scripts.check_db
 # equivalente: alembic upgrade head
 # revertir: alembic downgrade base
 
