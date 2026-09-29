@@ -265,3 +265,90 @@ async def test_get_municipios_activos_retorna_lista() -> None:
     assert resultado[0].nombre == "Bogotá"
     assert resultado[1].nombre == "Medellín"
 
+
+def test_calcular_restriccion_vigencia_expirada_us_002_2() -> None:
+    """US-002.2: Decreto expirado no aplica restricción."""
+    decreto = _crear_decreto(
+        vigencia_desde=date(2025, 1, 1),
+        vigencia_hasta=date(2025, 12, 31),
+        dias="0,1,2,3,4",
+        digitos="3,4",
+    )
+    # Fecha en 2026 (después de vigencia_hasta)
+    fecha_hora = datetime(2026, 9, 28, 8, 0, tzinfo=ZONA_COLOMBIA)
+    assert calcular_restriccion("ABC123", decreto, fecha_hora) is False
+
+
+def test_calcular_restriccion_decreto_inactivo_us_002_2() -> None:
+    """US-002.2: Decreto con is_active=False no restringe."""
+    decreto = _crear_decreto(dias="0,1,2,3,4", digitos="3,4")
+    decreto.is_active = False
+    fecha_hora = datetime(2026, 9, 28, 8, 0, tzinfo=ZONA_COLOMBIA)
+    assert calcular_restriccion("ABC123", decreto, fecha_hora) is False
+
+
+def test_calcular_restriccion_con_fecha_naive_asume_bogota_us_002_2() -> None:
+    """US-002.2: Fecha naive sin tzinfo se interpreta en America/Bogota."""
+    decreto = _crear_decreto(
+        dias="0,1,2,3,4",
+        digitos="3,4",
+        hora_inicio=time(6, 0),
+        hora_fin=time(20, 0),
+    )
+    # Datetime sin tzinfo (naive) correspondiente a lunes a las 07:30
+    naive_dt = datetime(2026, 9, 28, 7, 30)
+    assert calcular_restriccion("ABC123", decreto, naive_dt) is True
+
+
+def test_calcular_restriccion_metodo_estatico_y_de_instancia_us_002_2() -> None:
+    """US-002.2: _calcular_restriccion es método estático y funciona en clase e instancia."""
+    decreto = _crear_decreto(dias="0,1,2,3,4", digitos="3,4")
+    fecha_hora = datetime(2026, 9, 28, 8, 0, tzinfo=ZONA_COLOMBIA)
+
+    # Llamada directa en la clase
+    res_clase = ConsultaService._calcular_restriccion("ABC123", decreto, fecha_hora)
+    assert res_clase is True
+
+    # Llamada a través de una instancia
+    mock_db = AsyncMock()
+    service = ConsultaService(mock_db)
+    res_instancia = service._calcular_restriccion("ABC123", decreto, fecha_hora)
+    assert res_instancia is True
+
+
+def test_calcular_restriccion_latencia_menor_un_segundo_us_002_2() -> None:
+    """US-002.2: La evaluación del algoritmo puro ejecuta 1.000 iteraciones en < 0.1 s."""
+    import time as time_lib
+
+    decreto = _crear_decreto(dias="0,1,2,3,4", digitos="3,4")
+    fecha_hora = datetime(2026, 9, 28, 8, 0, tzinfo=ZONA_COLOMBIA)
+
+    inicio = time_lib.perf_counter()
+    for _ in range(1000):
+        calcular_restriccion("ABC123", decreto, fecha_hora)
+    duracion = time_lib.perf_counter() - inicio
+
+    # 1.000 evaluaciones deben tomar mucho menos de 1 segundo (ej. < 0.1s)
+    assert duracion < 0.1
+
+
+@pytest.mark.asyncio
+async def test_verificar_restriccion_sin_fecha_usa_ahora_colombia_us_002_2() -> None:
+    """US-002.2: Si no se provee fecha_hora, usa la fecha y hora actual de Colombia."""
+    db = AsyncMock()
+    municipio = Municipio(id=1, nombre="Bogotá", departamento="Cundinamarca", codigo_dane="11001")
+    db.get = AsyncMock(return_value=municipio)
+    db.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [])))
+    db.add = MagicMock()
+    db.flush = AsyncMock()
+    db.refresh = AsyncMock()
+
+    service = ConsultaService(db)
+    # Sin fecha_hora enviada
+    payload = ConsultaRequest(placa="ABC123", municipio_id=1)
+    response = await service.verificar_restriccion(payload)
+
+    assert response.fecha_hora_consultada is not None
+    assert response.fecha_hora_consultada.tzinfo is not None
+
+

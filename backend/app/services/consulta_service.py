@@ -50,20 +50,34 @@ def calcular_restriccion(
 ) -> bool:
     """
     Lógica pura de verificación de restricción (sin acceso a BD).
-    Fácil de unit-testear (US-002).
+    Fácil de unit-testear (US-002.2, REQ-FUNC-002).
+
+    1. Asegura zona horaria America/Bogota (si es naive se asume Bogotá)
+    2. Comprueba decreto activo y vigencia temporal
+    3. Verifica día de la semana (0=Lunes ... 6=Domingo)
+    4. Verifica rango de horario (hora_inicio <= hora <= hora_fin)
+    5. Verifica dígito restringido (último número, compatible con particulares y motos)
     """
     dt = a_colombia(fecha_hora)
 
-    # 1. Verificar día de la semana (0=Lunes ... 6=Domingo)
+    # 1. Decreto activo y vigencia
+    if getattr(decreto, "is_active", True) is False:
+        return False
+    if decreto.vigencia_desde and dt.date() < decreto.vigencia_desde:
+        return False
+    if decreto.vigencia_hasta and dt.date() > decreto.vigencia_hasta:
+        return False
+
+    # 2. Verificar día de la semana (0=Lunes ... 6=Domingo)
     if dt.weekday() not in decreto.lista_dias():
         return False
 
-    # 2. Verificar rango de horario
+    # 3. Verificar rango de horario
     hora_actual = dt.time()
     if not (decreto.hora_inicio <= hora_actual <= decreto.hora_fin):
         return False
 
-    # 3. Verificar dígito restringido
+    # 4. Verificar dígito restringido
     digito = ultimo_digito(placa)
     if digito not in decreto.lista_digitos():
         return False
@@ -214,8 +228,13 @@ class ConsultaService:
         await self.db.refresh(consulta)
         return consulta
 
+    @staticmethod
     def _calcular_restriccion(
-        self, placa: str, decreto: Decreto, fecha_hora: datetime
+        placa: str, decreto: Decreto, fecha_hora: datetime
     ) -> bool:
-        """Lógica pura de verificación de restricción delegada."""
+        """
+        Lógica pura de verificación de restricción delegada (US-002.2).
+        Puede llamarse tanto desde la instancia como desde la clase ConsultaService.
+        """
         return calcular_restriccion(placa, decreto, fecha_hora)
+
