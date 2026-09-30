@@ -31,24 +31,30 @@ export default function ResultadoConsulta({ resultado }: ResultadoConsultaProps)
           {resultado.tiene_restriccion ? '¡Pico y Placa Activo!' : 'Sin restricción'}
         </span>
       </div>
-      <p className="text-gray-700">{resultado.mensaje}</p>
 
-      {resultado.detalle && (
-        <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-600 space-y-1">
-          <p>
-            <span className="font-semibold text-gray-700">Horario de restricción:</span>{' '}
-            {resultado.detalle.hora_inicio} - {resultado.detalle.hora_fin}
-          </p>
-          {resultado.detalle.digitos_restringidos && (
-            <p>
-              <span className="font-semibold text-gray-700">Dígitos restringidos:</span>{' '}
-              {resultado.detalle.digitos_restringidos.join(', ')}
-            </p>
-          )}
-          {resultado.detalle.descripcion && (
-            <p className="text-gray-500 text-xs italic">{resultado.detalle.descripcion}</p>
+      {resultado.tiene_restriccion ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-2">
+          <h4 className="text-red-800 font-bold mb-1">¡Pico y Placa Activo!</h4>
+          {resultado.detalle ? (
+            <div className="text-red-700 text-sm space-y-1">
+              <p>
+                Tu vehículo tiene restricción de movilidad desde las <strong>{resultado.detalle.hora_inicio}</strong> hasta las <strong>{resultado.detalle.hora_fin}</strong>.
+              </p>
+              {resultado.detalle.digitos_restringidos && (
+                <p>
+                  <strong>Dígitos restringidos:</strong> {resultado.detalle.digitos_restringidos.join(', ')}
+                </p>
+              )}
+              {resultado.detalle.descripcion && (
+                <p className="text-red-600 text-xs italic mt-1">{resultado.detalle.descripcion}</p>
+              )}
+            </div>
+          ) : (
+            <p className="text-red-700 text-sm">{resultado.mensaje}</p>
           )}
         </div>
+      ) : (
+        <p className="text-gray-700">{resultado.mensaje}</p>
       )}
     </Card>
   );
