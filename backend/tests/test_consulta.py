@@ -178,6 +178,42 @@ async def test_verificar_restriccion_con_restriccion_activa() -> None:
 
 
 @pytest.mark.asyncio
+async def test_verificar_restriccion_sin_restriccion_ac_004() -> None:
+    """AC-004 / US-002.4: Si no hay restricción para el vehículo, retorna mensaje confirmando sin restricción y detalle None."""
+    db = AsyncMock()
+    municipio = Municipio(id=1, nombre="Bogotá", departamento="Cundinamarca", codigo_dane="11001")
+    decreto = _crear_decreto(
+        decreto_id=10,
+        municipio_id=1,
+        dias="0,1,2,3,4",
+        digitos="1,2",
+        hora_inicio=time(6, 0),
+        hora_fin=time(21, 0),
+        descripcion="Bogotá particular",
+    )
+    db.get = AsyncMock(return_value=municipio)
+    db.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [decreto])))
+    db.add = MagicMock()
+    db.flush = AsyncMock()
+    db.refresh = AsyncMock()
+
+    service = ConsultaService(db)
+    # Lunes a las 08:00 con placa terminada en 3 (no restringida)
+    payload = ConsultaRequest(
+        placa="ABC123",
+        municipio_id=1,
+        fecha_hora=datetime(2026, 9, 28, 8, 0, tzinfo=ZONA_COLOMBIA),
+    )
+    response = await service.verificar_restriccion(payload)
+
+    assert response.tiene_restriccion is False
+    assert response.detalle is None
+    assert "Sin restricción" in response.mensaje
+    assert "ABC123" in response.mensaje
+    assert "Bogotá" in response.mensaje
+
+
+@pytest.mark.asyncio
 async def test_verificar_restriccion_guarda_historial_con_usuario() -> None:
     """Registra id_usuario en historial cuando el usuario está autenticado."""
     db = AsyncMock()
