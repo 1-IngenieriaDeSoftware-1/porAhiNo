@@ -33,7 +33,7 @@ export default function ResultadoConsulta({ resultado }: ResultadoConsultaProps)
       </div>
 
       {resultado.tiene_restriccion ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-2">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-2" id="alerta-con-restriccion">
           <h4 className="text-red-800 font-bold mb-1">¡Pico y Placa Activo!</h4>
           {resultado.detalle ? (
             <div className="text-red-700 text-sm space-y-1">
@@ -54,7 +54,10 @@ export default function ResultadoConsulta({ resultado }: ResultadoConsultaProps)
           )}
         </div>
       ) : (
-        <p className="text-gray-700">{resultado.mensaje}</p>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-2" id="confirmacion-sin-restriccion">
+          <h4 className="text-green-800 font-bold mb-1">Sin restricción</h4>
+          <p className="text-green-700 text-sm">{resultado.mensaje}</p>
+        </div>
       )}
     </Card>
   );
