@@ -21,8 +21,8 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      await login(email, password);
-      router.push(ROUTES.home);
+      const me = await login(email, password);
+      router.push(me.rol === 'admin' ? ROUTES.admin : ROUTES.home);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
       setError(axiosErr.response?.data?.detail || 'No se pudo iniciar sesión');

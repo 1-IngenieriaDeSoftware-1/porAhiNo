@@ -100,7 +100,14 @@ python -m scripts.seed_decretos
 python -m scripts.seed_pruebas
 ```
 
-Admin de desarrollo: `admin@porahino.co` / `Admin1234`.
+**Admin de desarrollo (US-004.1):** tras el seed, inicia sesión en `/auth/login` con:
+
+| Campo | Valor |
+|-------|--------|
+| Email | `admin@porahino.co` |
+| Contraseña | `Admin1234` |
+
+Solo ese rol ve el enlace **Admin** y puede usar `/admin` y `/api/v1/admin/*`. Un conductor recibe **403**. El registro público siempre crea rol `conductor` (no se puede auto-promover a admin).
 
 ### Frontend
 
@@ -126,7 +133,8 @@ Consulta en 2 clics desde home: **Consultar restricción** → **Verificar estad
 | POST | `/api/v1/consulta/` | No | US-002 |
 | GET | `/api/v1/consulta/municipios` | No | US-003 |
 | CRUD | `/api/v1/vehiculos` | Bearer | US-001 / US-006 |
-| CRUD | `/api/v1/admin/decretos` | Bearer + admin | US-004 |
+| CRUD | `/api/v1/admin/decretos` | Bearer + admin | US-004 / US-004.1 |
+| CRUD | `/api/v1/admin/municipios` | Bearer + admin | US-004.1 |
 | GET | `/api/v1/health` | No | Monitoreo |
 
 Contrato de consulta: placa colombiana (`ABC123` o `ABC12D`) + `municipio_id`. Placa inválida → 422 (AC-002).
