@@ -17,7 +17,7 @@ interface AuthContextValue {
   user: UsuarioAPI | null;
   loading: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<UsuarioAPI>;
   registro: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -56,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOKEN_STORAGE_KEY, token.access_token);
     const me = await authService.getMe();
     setUser(me);
+    return me;
   }, []);
 
   const registro = useCallback(async (email: string, password: string) => {

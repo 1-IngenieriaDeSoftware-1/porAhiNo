@@ -7,7 +7,8 @@ NUNCA exponen el password_hash en respuestas.
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, field_validator
+
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.models.usuario import RolUsuario
 
@@ -15,10 +16,12 @@ from app.models.usuario import RolUsuario
 # --- Input schemas (request body) ---
 
 class UsuarioCreate(BaseModel):
-    """Schema para registro de nuevo usuario."""
+    """Schema para registro público. El rol admin no se acepta por API (US-004.1)."""
+
+    model_config = ConfigDict(extra="forbid")
+
     email: EmailStr
     password: str  # Se hashea en el service, nunca se guarda en texto plano
-    rol: RolUsuario = RolUsuario.CONDUCTOR
 
     @field_validator("password")
     @classmethod
