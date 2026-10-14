@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ConflictError
+from app.core.exceptions import ConflictError, NotFoundError
 from app.core.placa import validar_placa
 from app.models.vehiculo import Vehiculo
 from app.schemas.vehiculo import VehiculoCreate, VehiculoUpdate
@@ -55,13 +55,28 @@ class VehiculoService:
         return vehiculo
 
     async def get_by_id(self, vehiculo_id: int, usuario_id: int) -> Vehiculo:
-        """TODO: Agregar control de acceso."""
-        raise NotImplementedError("Detalle de vehículo pendiente (US-001)")
+        result = await self.db.execute(
+            select(Vehiculo).where(
+                Vehiculo.id == vehiculo_id,
+                Vehiculo.id_usuario == usuario_id,
+            )
+        )
+        vehiculo = result.scalar_one_or_none()
+        if vehiculo is None:
+            raise NotFoundError("Vehículo no encontrado")
+        return vehiculo
 
     async def update(self, vehiculo_id: int, payload: VehiculoUpdate, usuario_id: int) -> Vehiculo:
-        """TODO: Actualizar alias y/o tipo del vehículo."""
-        raise NotImplementedError("Actualización de vehículo pendiente (US-001)")
+        vehiculo = await self.get_by_id(vehiculo_id, usuario_id)
+        if payload.alias is not None:
+            vehiculo.alias = payload.alias
+        if payload.tipo is not None:
+            vehiculo.tipo = payload.tipo
+        await self.db.flush()
+        await self.db.refresh(vehiculo)
+        return vehiculo
 
     async def delete(self, vehiculo_id: int, usuario_id: int) -> None:
-        """TODO: Eliminar vehículo verificando pertenencia al usuario."""
-        raise NotImplementedError("Eliminación de vehículo pendiente (US-001)")
+        vehiculo = await self.get_by_id(vehiculo_id, usuario_id)
+        await self.db.delete(vehiculo)
+        await self.db.flush()
