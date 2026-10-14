@@ -2,6 +2,7 @@ import apiClient from './apiClient';
 import type { DecretoAPI, MunicipioAPI } from '@/types/api';
 
 export type DecretoCreate = Omit<DecretoAPI, 'id' | 'is_active'>;
+export type DecretoUpdate = Partial<DecretoCreate> & { is_active?: boolean };
 
 const adminService = {
   async listarDecretos(): Promise<DecretoAPI[]> {
@@ -14,7 +15,7 @@ const adminService = {
     return data;
   },
 
-  async actualizarDecreto(id: number, payload: Partial<DecretoCreate>): Promise<DecretoAPI> {
+  async actualizarDecreto(id: number, payload: DecretoUpdate): Promise<DecretoAPI> {
     const { data } = await apiClient.put<DecretoAPI>(`/admin/decretos/${id}`, payload);
     return data;
   },
