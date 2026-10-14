@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.exceptions import ConflictError, UnauthorizedError
 from app.core.security import create_access_token, get_password_hash, verify_password
-from app.models.usuario import Usuario
+from app.models.usuario import RolUsuario, Usuario
 from app.schemas.usuario import LoginRequest, UsuarioCreate
 
 
@@ -26,10 +26,11 @@ class AuthService:
         if existente.scalar_one_or_none() is not None:
             raise ConflictError("Ya existe una cuenta con ese correo")
 
+        # US-004.1: registro público siempre conductor; admin solo por seed.
         usuario = Usuario(
             email=payload.email,
             password_hash=get_password_hash(payload.password),
-            rol=payload.rol,
+            rol=RolUsuario.CONDUCTOR,
         )
         self.db.add(usuario)
         await self.db.flush()

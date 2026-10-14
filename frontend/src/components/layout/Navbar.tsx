@@ -17,7 +17,8 @@ export default function Navbar() {
 
   const links = [
     ...NAV_PUBLIC,
-    ...(user ? [{ href: ROUTES.vehiculos, label: 'Mis vehículos', id: 'nav-vehiculos' }] : []),
+    // Vehículos es para conductores; el admin gestiona decretos (US-004).
+    ...(user && !isAdmin ? [{ href: ROUTES.vehiculos, label: 'Mis vehículos', id: 'nav-vehiculos' }] : []),
     ...(isAdmin ? [{ href: ROUTES.admin, label: 'Admin', id: 'nav-admin' }] : []),
   ];
 
