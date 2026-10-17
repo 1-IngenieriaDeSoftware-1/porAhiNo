@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import vehiculosService from '@/services/vehiculosService';
 import type { TipoVehiculo, VehiculoAPI } from '@/types/api';
 import { formatPlaca, validarPlaca, PLACA_MENSAJE_ERROR } from '@/lib/placa';
+import { apiErrorMessage } from '@/lib/utils';
 import { useToast } from '@/providers/ToastProvider';
 
 interface VehiculoFormModalProps {
@@ -68,17 +69,11 @@ export default function VehiculoFormModal({
       onClose();
       success(`Vehículo ${nuevoVehiculo.placa} guardado`);
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const response = (err as { response?: { data?: { detail?: string | Array<{ msg: string }> }; status?: number } }).response;
-        if (response?.status === 422) {
-          toastError(PLACA_MENSAJE_ERROR);
-        } else if (typeof response?.data?.detail === 'string') {
-          toastError(response.data.detail);
-        } else if (Array.isArray(response?.data?.detail)) {
-          toastError(response.data.detail.map((d) => d.msg).join(', '));
-        } else {
-          toastError('Ocurrió un error al guardar el vehículo. Intente nuevamente.');
-        }
+      const status = (err as { response?: { status?: number } }).response?.status;
+      if (status === 422) {
+        toastError(PLACA_MENSAJE_ERROR);
+      } else if (status) {
+        toastError(apiErrorMessage(err, 'Ocurrió un error al guardar el vehículo. Intente nuevamente.'));
       } else {
         toastError('No fue posible conectar con el servidor. Verifique su conexión.');
       }

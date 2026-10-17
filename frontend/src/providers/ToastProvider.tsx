@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -22,6 +23,7 @@ interface ToastItem {
   message: string;
   kind: ToastKind;
   leaving: boolean;
+  durationMs: number;
 }
 
 interface ToastContextValue {
@@ -34,27 +36,117 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
-const KIND_STYLES: Record<ToastKind, string> = {
-  success: 'bg-success-light/95 border-success/30 text-success-dark',
-  error: 'bg-danger-light/95 border-danger/30 text-danger-dark',
-  info: 'bg-primary-50/95 border-primary-200 text-primary-800',
-  warning: 'bg-warning-light/95 border-warning/30 text-warning-dark',
+const KIND_META: Record<
+  ToastKind,
+  { label: string; accent: string; iconBg: string; iconColor: string; bar: string }
+> = {
+  success: {
+    label: 'Éxito',
+    accent: 'border-l-success',
+    iconBg: 'bg-success/15',
+    iconColor: 'text-success',
+    bar: 'bg-success',
+  },
+  error: {
+    label: 'Error',
+    accent: 'border-l-danger',
+    iconBg: 'bg-danger/15',
+    iconColor: 'text-danger',
+    bar: 'bg-danger',
+  },
+  info: {
+    label: 'Aviso',
+    accent: 'border-l-primary-600',
+    iconBg: 'bg-primary-100',
+    iconColor: 'text-primary-700',
+    bar: 'bg-primary-600',
+  },
+  warning: {
+    label: 'Atención',
+    accent: 'border-l-warning',
+    iconBg: 'bg-warning/15',
+    iconColor: 'text-warning',
+    bar: 'bg-warning',
+  },
 };
 
-const KIND_LABEL: Record<ToastKind, string> = {
-  success: 'Éxito',
-  error: 'Error',
-  info: 'Aviso',
-  warning: 'Atención',
-};
-
-const FADE_MS = 400;
+const FADE_MS = 380;
 const DEFAULT_DURATION_MS = 3000;
+
+function ToastIcon({ kind }: { kind: ToastKind }) {
+  const common = 'h-[18px] w-[18px]';
+  if (kind === 'success') {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M5 13l4 4L19 7"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  if (kind === 'error') {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M12 8v5m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+  if (kind === 'warning') {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M12 9v4m0 4h.01M10.3 4.2L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 4.2a2 2 0 00-3.4 0z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 16v-5m0-4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function toToastText(message: unknown): string {
+  if (typeof message === 'string' && message.trim()) return message;
+  if (message == null) return 'Notificación';
+  try {
+    return String(message);
+  } catch {
+    return 'Notificación';
+  }
+}
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const idRef = useRef(0);
   const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+    };
+  }, []);
 
   const dismiss = useCallback((id: number) => {
     setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)));
@@ -72,7 +164,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const id = ++idRef.current;
       const kind = options?.kind ?? 'info';
       const durationMs = options?.durationMs ?? DEFAULT_DURATION_MS;
-      setToasts((prev) => [...prev, { id, message, kind, leaving: false }]);
+      const text = toToastText(message);
+      setToasts((prev) => [...prev.slice(-4), { id, message: text, kind, leaving: false, durationMs }]);
       const timer = setTimeout(() => dismiss(id), durationMs);
       timersRef.current.set(id, timer);
     },
@@ -94,36 +187,57 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex flex-col items-end gap-2 p-4 sm:p-6"
+        className="pointer-events-none fixed top-0 right-0 z-[100] flex w-full max-w-[420px] flex-col items-end gap-3 p-4 sm:p-5"
         aria-live="polite"
         aria-relevant="additions"
       >
-        {toasts.map((item) => (
-          <div
-            key={item.id}
-            role="status"
-            className={`toast-item ${KIND_STYLES[item.kind]} ${
-              item.leaving ? 'animate-toast-out' : 'animate-toast-in'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-wide opacity-70">
-                  {KIND_LABEL[item.kind]}
-                </p>
-                <p className="text-sm font-medium leading-snug mt-0.5">{item.message}</p>
+        {toasts.map((item) => {
+          const meta = KIND_META[item.kind];
+          return (
+            <div
+              key={item.id}
+              role="status"
+              className={`toast-item border-l-[3px] ${meta.accent} ${
+                item.leaving ? 'animate-toast-out' : 'animate-toast-in'
+              }`}
+              style={{ ['--toast-duration' as string]: `${item.durationMs}ms` }}
+            >
+              <div className="flex items-start gap-3 px-4 pb-3.5 pt-3.5">
+                <span
+                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${meta.iconBg} ${meta.iconColor}`}
+                >
+                  <ToastIcon kind={item.kind} />
+                </span>
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-500">
+                    {meta.label}
+                  </p>
+                  <p className="mt-0.5 text-sm font-medium leading-snug text-ink-900">{item.message}</p>
+                </div>
+                <button
+                  type="button"
+                  className="pointer-events-auto -mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ink-50 hover:text-ink-700"
+                  aria-label="Cerrar notificación"
+                  onClick={() => dismiss(item.id)}
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path
+                      d="M6 6l12 12M18 6L6 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
               </div>
-              <button
-                type="button"
-                className="pointer-events-auto -mr-1 -mt-0.5 rounded-lg px-2 py-1 text-sm opacity-60 hover:opacity-100"
-                aria-label="Cerrar notificación"
-                onClick={() => dismiss(item.id)}
-              >
-                ×
-              </button>
+              {!item.leaving && (
+                <div className="toast-progress-track" aria-hidden>
+                  <div className={`toast-progress-bar ${meta.bar}`} />
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );
