@@ -82,7 +82,7 @@ export default function VehiculosPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary-700">Mis vehículos</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Administra tus vehículos registrados para consultas rápidas
+            Guarda varios vehículos del hogar y consúltalos en un clic (US-006)
           </p>
         </div>
         <button

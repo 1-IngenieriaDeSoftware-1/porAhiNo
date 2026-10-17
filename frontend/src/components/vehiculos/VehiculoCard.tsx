@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import type { VehiculoAPI } from '@/types/api';
+import { ROUTES } from '@/lib/routes';
 import vehiculosService from '@/services/vehiculosService';
 
 interface VehiculoCardProps {
@@ -63,15 +65,24 @@ export default function VehiculoCard({ vehiculo, onDelete }: VehiculoCardProps) 
       </div>
 
       {/* Acciones */}
-      <button
-        onClick={handleEliminar}
-        disabled={eliminando}
-        className="text-gray-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-colors text-sm font-medium"
-        title="Eliminar vehículo"
-        type="button"
-      >
-        {eliminando ? 'Deleting...' : '🗑️'}
-      </button>
+      <div className="flex items-center gap-1">
+        <Link
+          href={`${ROUTES.consulta}?placa=${encodeURIComponent(vehiculo.placa)}`}
+          className="text-primary-700 hover:bg-primary-50 px-3 py-2 rounded-xl text-sm font-medium transition-colors"
+          id={`btn-consultar-${vehiculo.id}`}
+        >
+          Consultar
+        </Link>
+        <button
+          onClick={handleEliminar}
+          disabled={eliminando}
+          className="text-gray-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-colors text-sm font-medium"
+          title="Eliminar vehículo"
+          type="button"
+        >
+          {eliminando ? '…' : '🗑️'}
+        </button>
+      </div>
     </div>
   );
 }
