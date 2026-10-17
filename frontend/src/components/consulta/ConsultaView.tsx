@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import ConsultaForm from '@/components/consulta/ConsultaForm';
 import ResultadoConsulta from '@/components/consulta/ResultadoConsulta';
 import { useConsulta } from '@/hooks/useConsulta';
@@ -9,7 +10,9 @@ export default function ConsultaView() {
 
   return (
     <div className="space-y-6">
-      <ConsultaForm onSubmit={consultar} loading={loading} />
+      <Suspense fallback={<p className="text-sm text-gray-500">Cargando formulario…</p>}>
+        <ConsultaForm onSubmit={consultar} loading={loading} />
+      </Suspense>
       {error && (
         <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3" role="alert">
           {error}
