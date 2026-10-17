@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { formatPlaca, validarPlaca, PLACA_MENSAJE_ERROR } from '@/lib/placa';
+import { useAuth } from '@/providers/AuthProvider';
 import consultaService from '@/services/consultaService';
-import type { ConsultaRequestAPI, MunicipioAPI } from '@/types/api';
+import vehiculosService from '@/services/vehiculosService';
+import type { ConsultaRequestAPI, MunicipioAPI, VehiculoAPI } from '@/types/api';
 
 interface ConsultaFormProps {
   onSubmit: (payload: ConsultaRequestAPI) => Promise<void>;
@@ -13,13 +16,25 @@ interface ConsultaFormProps {
 }
 
 export default function ConsultaForm({ onSubmit, loading = false }: ConsultaFormProps) {
+  const { user, isAdmin } = useAuth();
+  const searchParams = useSearchParams();
   const [placa, setPlaca] = useState('');
+  const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState('');
   const [municipioId, setMunicipioId] = useState('');
   const [municipios, setMunicipios] = useState<MunicipioAPI[]>([]);
+  const [vehiculos, setVehiculos] = useState<VehiculoAPI[]>([]);
   const [cargaMunicipios, setCargaMunicipios] = useState(true);
+  const [cargaVehiculos, setCargaVehiculos] = useState(false);
   const [errorPlaca, setErrorPlaca] = useState<string | undefined>();
   const [errorMunicipio, setErrorMunicipio] = useState<string | undefined>();
   const [avisoMunicipios, setAvisoMunicipios] = useState<string | null>(null);
+
+  useEffect(() => {
+    const placaUrl = searchParams.get('placa');
+    if (placaUrl) {
+      setPlaca(formatPlaca(placaUrl));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let cancel = false;
@@ -48,6 +63,45 @@ export default function ConsultaForm({ onSubmit, loading = false }: ConsultaForm
     };
   }, []);
 
+  useEffect(() => {
+    if (!user || isAdmin) {
+      setVehiculos([]);
+      return;
+    }
+    let cancel = false;
+    setCargaVehiculos(true);
+    vehiculosService
+      .listarVehiculos()
+      .then((data) => {
+        if (!cancel) setVehiculos(data);
+      })
+      .catch(() => {
+        if (!cancel) setVehiculos([]);
+      })
+      .finally(() => {
+        if (!cancel) setCargaVehiculos(false);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [user, isAdmin]);
+
+  useEffect(() => {
+    if (!placa || vehiculos.length === 0) return;
+    const match = vehiculos.find((v) => v.placa === placa);
+    if (match) setVehiculoSeleccionado(String(match.id));
+  }, [placa, vehiculos]);
+
+  const handleSeleccionarVehiculo = (id: string) => {
+    setVehiculoSeleccionado(id);
+    if (!id) return;
+    const elegido = vehiculos.find((v) => String(v.id) === id);
+    if (elegido) {
+      setPlaca(elegido.placa);
+      setErrorPlaca(undefined);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const placaNorm = formatPlaca(placa);
@@ -72,8 +126,42 @@ export default function ConsultaForm({ onSubmit, loading = false }: ConsultaForm
     await onSubmit({ placa: placaNorm, municipio_id: Number(municipioId) });
   };
 
+  const mostrarSelectorVehiculos = Boolean(user && !isAdmin);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" id="form-consulta" noValidate>
+      {mostrarSelectorVehiculos && (
+        <div className="space-y-1">
+          <label htmlFor="select-vehiculo" className="block text-sm font-medium text-gray-700">
+            Mis vehículos
+          </label>
+          <select
+            id="select-vehiculo"
+            className="input-base"
+            value={vehiculoSeleccionado}
+            onChange={(e) => handleSeleccionarVehiculo(e.target.value)}
+            disabled={cargaVehiculos || vehiculos.length === 0}
+          >
+            <option value="">
+              {cargaVehiculos
+                ? 'Cargando vehículos...'
+                : vehiculos.length === 0
+                  ? 'No tienes vehículos guardados'
+                  : 'Elegir placa guardada'}
+            </option>
+            {vehiculos.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.placa}
+                {v.alias ? ` — ${v.alias}` : ''} ({v.tipo})
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-400">
+            US-006: elige un vehículo guardado para prellenar la placa, o escríbela a mano.
+          </p>
+        </div>
+      )}
+
       <Input
         id="input-placa"
         label="Placa del vehículo"
@@ -81,7 +169,10 @@ export default function ConsultaForm({ onSubmit, loading = false }: ConsultaForm
         maxLength={6}
         value={placa}
         onChange={(e) => {
-          setPlaca(formatPlaca(e.target.value));
+          const next = formatPlaca(e.target.value);
+          setPlaca(next);
+          const match = vehiculos.find((v) => v.placa === next);
+          setVehiculoSeleccionado(match ? String(match.id) : '');
           if (errorPlaca) setErrorPlaca(undefined);
         }}
         error={errorPlaca}
