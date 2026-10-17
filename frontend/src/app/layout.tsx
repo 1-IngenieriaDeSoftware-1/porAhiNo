@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { AuthProvider } from '@/providers/AuthProvider';
+import { ToastProvider } from '@/providers/ToastProvider';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], display: 'swap' });
+const sans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -31,17 +36,19 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#2563eb',
+  themeColor: '#345665',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={inter.className}>
+    <html lang="es" className={`${sans.variable} ${sans.className}`}>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
-        <AuthProvider>{children}</AuthProvider>
+      <body className="min-h-screen text-ink-900 antialiased">
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import vehiculosService from '@/services/vehiculosService';
 import type { TipoVehiculo, VehiculoAPI } from '@/types/api';
 import { formatPlaca, validarPlaca, PLACA_MENSAJE_ERROR } from '@/lib/placa';
+import { useToast } from '@/providers/ToastProvider';
 
 interface VehiculoFormModalProps {
   isOpen: boolean;
@@ -24,11 +25,11 @@ export default function VehiculoFormModal({
   onClose,
   onSuccess,
 }: VehiculoFormModalProps) {
+  const { error: toastError, success } = useToast();
   const [placaInput, setPlacaInput] = useState('');
   const [tipo, setTipo] = useState<TipoVehiculo>('particular');
   const [alias, setAlias] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errorApi, setErrorApi] = useState<string | null>(null);
   const [touchedPlaca, setTouchedPlaca] = useState(false);
 
   if (!isOpen) return null;
@@ -39,7 +40,6 @@ export default function VehiculoFormModal({
 
   const handlePlacaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPlacaInput(e.target.value.toUpperCase());
-    setErrorApi(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +51,6 @@ export default function VehiculoFormModal({
     }
 
     setLoading(true);
-    setErrorApi(null);
 
     try {
       const nuevoVehiculo = await vehiculosService.crearVehiculo({
@@ -60,7 +59,6 @@ export default function VehiculoFormModal({
         alias: alias.trim() || undefined,
       });
 
-      // Limpiar formulario
       setPlacaInput('');
       setAlias('');
       setTipo('particular');
@@ -68,20 +66,21 @@ export default function VehiculoFormModal({
 
       onSuccess(nuevoVehiculo);
       onClose();
+      success(`Vehículo ${nuevoVehiculo.placa} guardado`);
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const response = (err as { response?: { data?: { detail?: string | Array<{ msg: string }> }; status?: number } }).response;
         if (response?.status === 422) {
-          setErrorApi(PLACA_MENSAJE_ERROR);
+          toastError(PLACA_MENSAJE_ERROR);
         } else if (typeof response?.data?.detail === 'string') {
-          setErrorApi(response.data.detail);
+          toastError(response.data.detail);
         } else if (Array.isArray(response?.data?.detail)) {
-          setErrorApi(response.data.detail.map((d) => d.msg).join(', '));
+          toastError(response.data.detail.map((d) => d.msg).join(', '));
         } else {
-          setErrorApi('Ocurrió un error al guardar el vehículo. Intente nuevamente.');
+          toastError('Ocurrió un error al guardar el vehículo. Intente nuevamente.');
         }
       } else {
-        setErrorApi('No fue posible conectar con el servidor. Verifique su conexión.');
+        toastError('No fue posible conectar con el servidor. Verifique su conexión.');
       }
     } finally {
       setLoading(false);
@@ -109,15 +108,6 @@ export default function VehiculoFormModal({
           </button>
         </div>
 
-        {/* Alerta de Error de API */}
-        {errorApi && (
-          <div id="alerta-error-vehiculo" className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-start gap-2">
-            <span className="text-red-500 font-bold">⚠️</span>
-            <span>{errorApi}</span>
-          </div>
-        )}
-
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Campo: Placa */}
           <div>

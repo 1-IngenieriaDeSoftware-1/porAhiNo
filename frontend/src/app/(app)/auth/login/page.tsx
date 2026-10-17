@@ -6,26 +6,27 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { ROUTES } from '@/lib/routes';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { error: toastError, success } = useToast();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     try {
-      await login(email, password);
-      router.push(ROUTES.home);
+      const me = await login(email, password);
+      success('Sesión iniciada');
+      router.push(me.rol === 'admin' ? ROUTES.admin : ROUTES.home);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr.response?.data?.detail || 'No se pudo iniciar sesión');
+      toastError(axiosErr.response?.data?.detail || 'No se pudo iniciar sesión');
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,6 @@ export default function LoginPage() {
             autoComplete="current-password"
             required
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
           <Button id="btn-login" type="submit" className="w-full" loading={loading}>
             Iniciar sesión
           </Button>
