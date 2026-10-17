@@ -6,30 +6,31 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { ROUTES } from '@/lib/routes';
 
 export default function RegisterPage() {
   const { registro } = useAuth();
+  const { error: toastError, success } = useToast();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres');
+      toastError('La contraseña debe tener al menos 8 caracteres');
       return;
     }
     setLoading(true);
-    setError(null);
     try {
       await registro(email, password);
+      success('Cuenta creada');
       router.push(ROUTES.vehiculos);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr.response?.data?.detail || 'No se pudo crear la cuenta');
+      toastError(axiosErr.response?.data?.detail || 'No se pudo crear la cuenta');
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,6 @@ export default function RegisterPage() {
             helperText="Mínimo 8 caracteres"
             required
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" className="w-full" loading={loading}>
             Registrarme
           </Button>

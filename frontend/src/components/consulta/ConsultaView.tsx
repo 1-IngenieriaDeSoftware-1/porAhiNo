@@ -6,18 +6,13 @@ import ResultadoConsulta from '@/components/consulta/ResultadoConsulta';
 import { useConsulta } from '@/hooks/useConsulta';
 
 export default function ConsultaView() {
-  const { resultado, loading, error, consultar } = useConsulta();
+  const { resultado, loading, consultar } = useConsulta();
 
   return (
     <div className="space-y-6">
-      <Suspense fallback={<p className="text-sm text-gray-500">Cargando formulario…</p>}>
+      <Suspense fallback={<p className="text-sm text-ink-500">Cargando formulario…</p>}>
         <ConsultaForm onSubmit={consultar} loading={loading} />
       </Suspense>
-      {error && (
-        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3" role="alert">
-          {error}
-        </p>
-      )}
       <ResultadoConsulta resultado={resultado} />
     </div>
   );

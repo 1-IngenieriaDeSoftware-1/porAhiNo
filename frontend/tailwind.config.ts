@@ -7,70 +7,69 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    // Responsive desde 360px hasta 1920px (requisito no funcional)
     screens: {
-      'xs': '360px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
+      xs: '360px',
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
       '2xl': '1536px',
       '3xl': '1920px',
     },
     extend: {
       colors: {
-        // Paleta principal porAhiNo
+        // Paleta formal: tinta + teal (movilidad / institucional)
         primary: {
-          50:  '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#f3f7f8',
+          100: '#e1ecef',
+          200: '#c5dbe2',
+          300: '#9bc0cc',
+          400: '#6a9eaf',
+          500: '#4f8396',
+          600: '#3d697b',
+          700: '#345665',
+          800: '#2f4855',
+          900: '#2a3e4a',
         },
-        // Paleta Metro de Medellín
-        metro: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',  // Verde Metro aprox
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+        ink: {
+          50: '#f6f7f9',
+          100: '#eceef2',
+          200: '#d5dae3',
+          300: '#b0b9c9',
+          400: '#8593aa',
+          500: '#667690',
+          600: '#515e76',
+          700: '#434d60',
+          800: '#3a4251',
+          900: '#1c2430',
         },
-        // Estado: restringido
         danger: {
           light: '#fef2f2',
-          DEFAULT: '#ef4444',
-          dark: '#b91c1c',
+          DEFAULT: '#dc2626',
+          dark: '#991b1b',
         },
-        // Estado: libre de restricción
         success: {
-          light: '#f0fdf4',
-          DEFAULT: '#22c55e',
-          dark: '#15803d',
+          light: '#ecfdf5',
+          DEFAULT: '#059669',
+          dark: '#047857',
         },
-        // Estado: advertencia
         warning: {
           light: '#fffbeb',
-          DEFAULT: '#f59e0b',
+          DEFAULT: '#d97706',
           dark: '#b45309',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'sans-serif'],
+      },
+      boxShadow: {
+        toast: '0 10px 40px -12px rgba(28, 36, 48, 0.35)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.4s ease-out',
+        'toast-in': 'toastIn 0.35s ease-out',
+        'toast-out': 'toastOut 0.4s ease-in forwards',
         'pulse-soft': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
@@ -81,6 +80,14 @@ const config: Config = {
         slideUp: {
           '0%': { transform: 'translateY(16px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        toastIn: {
+          '0%': { transform: 'translateY(-12px) translateX(8px)', opacity: '0' },
+          '100%': { transform: 'translateY(0) translateX(0)', opacity: '1' },
+        },
+        toastOut: {
+          '0%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(-8px)', opacity: '0' },
         },
       },
     },

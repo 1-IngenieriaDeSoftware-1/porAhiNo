@@ -17,19 +17,19 @@ export default function Navbar() {
 
   const links = [
     ...NAV_PUBLIC,
-    ...(user ? [{ href: ROUTES.vehiculos, label: 'Mis vehículos', id: 'nav-vehiculos' }] : []),
+    ...(user && !isAdmin ? [{ href: ROUTES.vehiculos, label: 'Mis vehículos', id: 'nav-vehiculos' }] : []),
     ...(isAdmin ? [{ href: ROUTES.admin, label: 'Admin', id: 'nav-admin' }] : []),
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-100 shadow-sm" role="navigation" aria-label="Navegación principal">
+    <nav className="bg-white/90 backdrop-blur-md border-b border-ink-100 shadow-sm" role="navigation" aria-label="Navegación principal">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href={ROUTES.home} id="nav-brand" className="flex items-center gap-2">
             <span className="text-2xl" aria-hidden>
               🚗
             </span>
-            <span className="font-bold text-primary-700 text-lg">porAhiNo</span>
+            <span className="font-bold text-primary-800 text-lg tracking-tight">porAhiNo</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
@@ -39,14 +39,14 @@ export default function Navbar() {
                 href={link.href}
                 id={link.id}
                 className={`font-medium transition-colors ${
-                  pathname === link.href ? 'text-primary-700' : 'text-gray-600 hover:text-primary-600'
+                  pathname === link.href ? 'text-primary-800' : 'text-ink-600 hover:text-primary-700'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
             {!loading && user ? (
-              <button type="button" onClick={logout} className="text-gray-600 hover:text-primary-600 font-medium">
+              <button type="button" onClick={logout} className="text-ink-600 hover:text-primary-700 font-medium">
                 Cerrar sesión
               </button>
             ) : (
@@ -59,7 +59,7 @@ export default function Navbar() {
           <button
             type="button"
             id="nav-hamburger"
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            className="md:hidden p-2 rounded-lg text-ink-600 hover:bg-ink-50"
             aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
