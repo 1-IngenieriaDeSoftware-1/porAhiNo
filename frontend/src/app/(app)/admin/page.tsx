@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { ROUTES } from '@/lib/routes';
 import adminService from '@/services/adminService';
 import type { DecretoAPI, MunicipioAPI } from '@/types/api';
@@ -23,11 +24,11 @@ function formatearDias(diasStr: string): string {
 
 export default function AdminPage() {
   const { user, isAdmin, loading: authLoading } = useAuth();
+  const { error: toastError, success } = useToast();
   const [decretos, setDecretos] = useState<DecretoAPI[]>([]);
   const [municipios, setMunicipios] = useState<MunicipioAPI[]>([]);
   const [loadingData, setLoadingData] = useState<boolean>(true);
-  const [errorText, setErrorText] = useState<string | null>(null);
-  
+
   // Modal de creación / edición
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [decretoSeleccionado, setDecretoSeleccionado] = useState<DecretoAPI | null>(null);
@@ -35,7 +36,6 @@ export default function AdminPage() {
   const cargarDatos = useCallback(async () => {
     if (!isAdmin) return;
     setLoadingData(true);
-    setErrorText(null);
     try {
       const [muns, decs] = await Promise.all([
         adminService.listarMunicipios(),
@@ -44,11 +44,11 @@ export default function AdminPage() {
       setMunicipios(muns);
       setDecretos(decs);
     } catch {
-      setErrorText('No se pudieron cargar los datos de administración. Intenta nuevamente.');
+      toastError('No se pudieron cargar los datos de administración. Intenta nuevamente.');
     } finally {
       setLoadingData(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, toastError]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -75,8 +75,9 @@ export default function AdminPage() {
       setDecretos((prev) =>
         prev.map((d) => (d.id === decreto.id ? { ...d, is_active: false } : d))
       );
+      success('Decreto desactivado');
     } catch {
-      alert('Error al desactivar el decreto.');
+      toastError('Error al desactivar el decreto.');
     }
   };
 
@@ -158,16 +159,6 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {errorText && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center justify-between">
-          <span>⚠️ {errorText}</span>
-          <button onClick={cargarDatos} className="underline font-semibold hover:text-red-900">
-            Reintentar
-          </button>
-        </div>
-      )}
-
-      {/* Tabla de Decretos */}
       {loadingData ? (
         <div className="card animate-pulse space-y-3">
           <div className="h-6 bg-gray-200 rounded w-1/4"></div>

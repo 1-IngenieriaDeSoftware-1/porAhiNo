@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import type { VehiculoAPI } from '@/types/api';
 import { ROUTES } from '@/lib/routes';
+import { useToast } from '@/providers/ToastProvider';
 import vehiculosService from '@/services/vehiculosService';
 
 interface VehiculoCardProps {
@@ -20,6 +21,7 @@ const ICONO_TIPO: Record<string, { label: string; icon: string }> = {
 };
 
 export default function VehiculoCard({ vehiculo, onDelete }: VehiculoCardProps) {
+  const { error: toastError, success } = useToast();
   const [eliminando, setEliminando] = useState(false);
 
   const infoTipo = ICONO_TIPO[vehiculo.tipo] || { label: vehiculo.tipo, icon: '🚘' };
@@ -33,8 +35,9 @@ export default function VehiculoCard({ vehiculo, onDelete }: VehiculoCardProps) 
     try {
       await vehiculosService.eliminarVehiculo(vehiculo.id);
       onDelete(vehiculo.id);
+      success(`Vehículo ${vehiculo.placa} eliminado`);
     } catch {
-      alert('Error al eliminar el vehículo');
+      toastError('Error al eliminar el vehículo');
       setEliminando(false);
     }
   };

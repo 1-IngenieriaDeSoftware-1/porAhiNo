@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import adminService, { type DecretoCreate, type DecretoUpdate } from '@/services/adminService';
 import type { DecretoAPI, MunicipioAPI } from '@/types/api';
+import { useToast } from '@/providers/ToastProvider';
 
 interface DecretoFormModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export default function DecretoFormModal({
   decretoAEditar,
   municipios,
 }: DecretoFormModalProps) {
+  const { error: toastError, success } = useToast();
   const [municipioId, setMunicipioId] = useState<number>(municipios[0]?.id || 1);
   const [numeroDecreto, setNumeroDecreto] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -40,7 +42,6 @@ export default function DecretoFormModal({
   const [vigenciaHasta, setVigenciaHasta] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (decretoAEditar) {
@@ -73,7 +74,6 @@ export default function DecretoFormModal({
       setVigenciaHasta('');
       setIsActive(true);
     }
-    setErrorMsg(null);
   }, [decretoAEditar, municipios, isOpen]);
 
   if (!isOpen) return null;
@@ -88,25 +88,24 @@ export default function DecretoFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg(null);
 
     if (horaInicio >= horaFin) {
-      setErrorMsg('La hora de inicio debe ser anterior a la hora de fin.');
+      toastError('La hora de inicio debe ser anterior a la hora de fin.');
       return;
     }
 
     if (diasSeleccionados.length === 0) {
-      setErrorMsg('Debes seleccionar al menos un día de restricción.');
+      toastError('Debes seleccionar al menos un día de restricción.');
       return;
     }
 
     if (!digitosRestringidos.trim()) {
-      setErrorMsg('Debes ingresar al menos un dígito restringido.');
+      toastError('Debes ingresar al menos un dígito restringido.');
       return;
     }
 
     if (vigenciaHasta && vigenciaHasta < vigenciaDesde) {
-      setErrorMsg('La fecha de vigencia hasta no puede ser anterior a vigencia desde.');
+      toastError('La fecha de vigencia hasta no puede ser anterior a vigencia desde.');
       return;
     }
 
@@ -133,6 +132,7 @@ export default function DecretoFormModal({
 
         const actualizado = await adminService.actualizarDecreto(decretoAEditar.id, payload);
         onSuccess(actualizado, true);
+        success('Decreto actualizado');
       } else {
         const payload: DecretoCreate = {
           municipio_id: municipioId,
@@ -148,11 +148,12 @@ export default function DecretoFormModal({
 
         const creado = await adminService.crearDecreto(payload);
         onSuccess(creado, false);
+        success('Decreto creado');
       }
       onClose();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setErrorMsg(axiosErr.response?.data?.detail || 'Error al guardar el decreto.');
+      toastError(axiosErr.response?.data?.detail || 'Error al guardar el decreto.');
     } finally {
       setLoading(false);
     }
@@ -179,12 +180,6 @@ export default function DecretoFormModal({
             ✕
           </button>
         </div>
-
-        {errorMsg && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
-            ⚠️ {errorMsg}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Municipio */}
