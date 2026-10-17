@@ -63,8 +63,28 @@
            transition-all duration-200 placeholder:text-ink-400;
   }
 
+  /* Toasts estilo uiverse: card blanca + acento lateral + slide desde la derecha */
   .toast-item {
-    @apply pointer-events-auto w-full max-w-sm rounded-xl border px-4 py-3 shadow-toast
-           backdrop-blur-md;
+    @apply pointer-events-auto relative w-full max-w-[380px] overflow-hidden rounded-xl
+           border border-ink-100/90 bg-white shadow-toast;
+  }
+
+  .toast-progress-track {
+    @apply h-[3px] w-full bg-ink-100/80;
+  }
+
+  .toast-progress-bar {
+    @apply h-full origin-left;
+    animation: toastProgress var(--toast-duration, 3000ms) linear forwards;
   }
 }
+
+@keyframes toastProgress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+

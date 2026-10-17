@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import adminService, { type DecretoCreate, type DecretoUpdate } from '@/services/adminService';
 import type { DecretoAPI, MunicipioAPI } from '@/types/api';
 import { useToast } from '@/providers/ToastProvider';
+import { apiErrorMessage } from '@/lib/utils';
 
 interface DecretoFormModalProps {
   isOpen: boolean;
@@ -152,8 +153,7 @@ export default function DecretoFormModal({
       }
       onClose();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      toastError(axiosErr.response?.data?.detail || 'Error al guardar el decreto.');
+      toastError(apiErrorMessage(err, 'Error al guardar el decreto.'));
     } finally {
       setLoading(false);
     }
