@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { ROUTES } from '@/lib/routes';
 import vehiculosService from '@/services/vehiculosService';
 import type { VehiculoAPI } from '@/types/api';
@@ -11,24 +12,23 @@ import VehiculoCard from '@/components/vehiculos/VehiculoCard';
 
 export default function VehiculosPage() {
   const { user, loading: authLoading } = useAuth();
+  const { error: toastError } = useToast();
   const [vehiculos, setVehiculos] = useState<VehiculoAPI[]>([]);
   const [loadingVehiculos, setLoadingVehiculos] = useState<boolean>(true);
-  const [errorText, setErrorText] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const cargarVehiculos = useCallback(async () => {
     if (!user) return;
     setLoadingVehiculos(true);
-    setErrorText(null);
     try {
       const data = await vehiculosService.listarVehiculos();
       setVehiculos(data);
     } catch {
-      setErrorText('No se pudieron cargar tus vehículos. Intenta nuevamente.');
+      toastError('No se pudieron cargar tus vehículos. Intenta nuevamente.');
     } finally {
       setLoadingVehiculos(false);
     }
-  }, [user]);
+  }, [user, toastError]);
 
   useEffect(() => {
     if (user) {
@@ -96,17 +96,6 @@ export default function VehiculosPage() {
         </button>
       </div>
 
-      {/* Alerta de Error si ocurre en el GET */}
-      {errorText && (
-        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center justify-between">
-          <span>⚠️ {errorText}</span>
-          <button onClick={cargarVehiculos} className="underline font-semibold hover:text-red-900">
-            Reintentar
-          </button>
-        </div>
-      )}
-
-      {/* Estado de Carga */}
       {loadingVehiculos ? (
         <div className="space-y-3">
           <div className="h-20 bg-gray-100 animate-pulse rounded-2xl"></div>
