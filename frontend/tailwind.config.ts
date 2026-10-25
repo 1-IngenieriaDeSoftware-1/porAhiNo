@@ -63,13 +63,13 @@ const config: Config = {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'sans-serif'],
       },
       boxShadow: {
-        toast: '0 10px 40px -12px rgba(28, 36, 48, 0.35)',
+        toast: '0 12px 40px -10px rgba(28, 36, 48, 0.22), 0 4px 12px -4px rgba(28, 36, 48, 0.08)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.4s ease-out',
-        'toast-in': 'toastIn 0.35s ease-out',
-        'toast-out': 'toastOut 0.4s ease-in forwards',
+        'toast-in': 'toastIn 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+        'toast-out': 'toastOut 0.38s cubic-bezier(0.4, 0, 1, 1) forwards',
         'pulse-soft': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
@@ -82,12 +82,12 @@ const config: Config = {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         toastIn: {
-          '0%': { transform: 'translateY(-12px) translateX(8px)', opacity: '0' },
-          '100%': { transform: 'translateY(0) translateX(0)', opacity: '1' },
+          '0%': { transform: 'translateX(110%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
         },
         toastOut: {
-          '0%': { transform: 'translateY(0)', opacity: '1' },
-          '100%': { transform: 'translateY(-8px)', opacity: '0' },
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(110%)', opacity: '0' },
         },
       },
     },

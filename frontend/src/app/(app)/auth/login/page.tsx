@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { ROUTES } from '@/lib/routes';
+import { apiErrorMessage } from '@/lib/utils';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -25,8 +26,7 @@ export default function LoginPage() {
       success('Sesión iniciada');
       router.push(me.rol === 'admin' ? ROUTES.admin : ROUTES.home);
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      toastError(axiosErr.response?.data?.detail || 'No se pudo iniciar sesión');
+      toastError(apiErrorMessage(err, 'No se pudo iniciar sesión'));
     } finally {
       setLoading(false);
     }

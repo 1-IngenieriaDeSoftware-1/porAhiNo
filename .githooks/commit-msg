@@ -1,0 +1,5 @@
+#!/bin/sh
+# Quita trailers de atribución de Cursor para que no figure como contribuyente.
+tmpfile="$1.tmp"
+grep -viE '^(co-authored-by:[[:space:]]*cursor|made-with:[[:space:]]*cursor)' "$1" > "$tmpfile" && mv "$tmpfile" "$1"
+exit 0
