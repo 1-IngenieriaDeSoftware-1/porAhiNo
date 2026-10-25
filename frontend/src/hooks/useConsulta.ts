@@ -29,7 +29,7 @@ export function useConsulta(): UseConsultaReturn {
         apiErrorMessage(
           err,
           status === 501
-            ? 'La consulta aún no está implementada en el backend (US-002).'
+            ? 'La consulta aún no está disponible en el servidor. Intenta más tarde.'
             : 'Error al consultar la restricción. Intenta de nuevo.',
         ),
       );

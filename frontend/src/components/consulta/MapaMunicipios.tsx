@@ -66,7 +66,7 @@ export default function MapaMunicipios({
   municipioSeleccionadoId,
   onSeleccionarMunicipio,
   titulo = 'Mapa de Municipios con Pico y Placa',
-  subtitulo = 'Selecciona un municipio en el mapa para verificar el estado de restricción vehicular (US-003.3).',
+  subtitulo = 'Selecciona un municipio en el mapa para verificar el estado de restricción vehicular.',
 }: MapaMunicipiosProps) {
   const [municipios, setMunicipios] = useState<MunicipioAPI[]>(municipiosProp || []);
   const [loading, setLoading] = useState<boolean>(!municipiosProp);
