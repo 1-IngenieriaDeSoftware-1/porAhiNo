@@ -174,7 +174,7 @@ export default function ConsultaForm({
             ))}
           </select>
           <p className="text-xs text-gray-400">
-            US-006: elige un vehículo guardado para prellenar la placa, o escríbela a mano.
+            Elige un vehículo guardado para prellenar la placa, o escríbela a mano.
           </p>
         </div>
       )}

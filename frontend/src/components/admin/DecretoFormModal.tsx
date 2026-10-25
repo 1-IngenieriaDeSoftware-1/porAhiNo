@@ -168,7 +168,7 @@ export default function DecretoFormModal({
               {decretoAEditar ? 'Editar Decreto de Pico y Placa' : 'Crear Nuevo Decreto'}
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              Configura los horarios, días y dígitos aplicables (US-004.2)
+              Configura los horarios, días y dígitos aplicables
             </p>
           </div>
           <button
