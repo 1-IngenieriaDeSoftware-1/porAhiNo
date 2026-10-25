@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { ROUTES } from '@/lib/routes';
+import { apiErrorMessage } from '@/lib/utils';
 
 export default function RegisterPage() {
   const { registro } = useAuth();
@@ -29,8 +30,7 @@ export default function RegisterPage() {
       success('Cuenta creada');
       router.push(ROUTES.vehiculos);
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      toastError(axiosErr.response?.data?.detail || 'No se pudo crear la cuenta');
+      toastError(apiErrorMessage(err, 'No se pudo crear la cuenta'));
     } finally {
       setLoading(false);
     }

@@ -63,8 +63,132 @@
            transition-all duration-200 placeholder:text-ink-400;
   }
 
-  .toast-item {
-    @apply pointer-events-auto w-full max-w-sm rounded-xl border px-4 py-3 shadow-toast
-           backdrop-blur-md;
+}
+
+/* Viewport fijo arriba-derecha, debajo del navbar — no usar w-full aquí */
+.toast-viewport {
+  position: fixed;
+  top: 4.75rem;
+  right: 1rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+  width: min(22rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(28, 36, 48, 0.08);
+  border-left-width: 3px;
+  border-left-style: solid;
+  background: #fff;
+  box-shadow:
+    0 14px 36px -14px rgba(28, 36, 48, 0.28),
+    0 4px 12px -4px rgba(28, 36, 48, 0.1);
+}
+
+.toast-card--in {
+  animation: toastSlideIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toast-card--out {
+  animation: toastSlideOut 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.toast-card__body {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 0.75rem 0.85rem 0.9rem;
+}
+
+.toast-card__icon {
+  display: flex;
+  height: 2.15rem;
+  width: 2.15rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.toast-card__msg {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #1c2430;
+}
+
+.toast-card__close {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #8593aa;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.toast-card__close:hover {
+  background: #f6f7f9;
+  color: #1c2430;
+}
+
+.toast-card__track {
+  height: 3px;
+  width: 100%;
+  background: #eceef2;
+}
+
+.toast-card__bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  animation: toastProgress var(--toast-duration, 3000ms) linear forwards;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+

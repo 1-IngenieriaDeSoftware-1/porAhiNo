@@ -27,3 +27,26 @@ export function formatFechaHora(dateStr: string): string {
     timeZone: 'America/Bogota',
   }).format(new Date(dateStr));
 }
+
+/** Normaliza `detail` de FastAPI (string | lista de errores) a texto seguro para UI. */
+export function formatApiDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string' && detail.trim()) return detail;
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && 'msg' in item) {
+          return String((item as { msg: unknown }).msg);
+        }
+        return null;
+      })
+      .filter((v): v is string => Boolean(v));
+    if (parts.length) return parts.join(', ');
+  }
+  return fallback;
+}
+
+export function apiErrorMessage(err: unknown, fallback: string): string {
+  const axiosErr = err as { response?: { data?: { detail?: unknown } } };
+  return formatApiDetail(axiosErr.response?.data?.detail, fallback);
+}
