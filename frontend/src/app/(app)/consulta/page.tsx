@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 
 export default function ConsultaPage() {
   return (
-    <main className="px-4 py-8 max-w-2xl mx-auto">
+    <main className="px-4 py-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-primary-700 mb-2">Consultar Pico y Placa</h1>
       <p className="text-gray-500 mb-6 text-sm">
-        Ingresa la placa y el municipio. La consulta es pública (US-002). Si inicias sesión, puedes
+        Ingresa la placa y el municipio o explora el mapa interactivo (US-002 / US-003). Si inicias sesión, puedes
         elegir una placa de tus vehículos guardados (US-006).
       </p>
       <div className="card">

@@ -13,14 +13,21 @@ import type { ConsultaRequestAPI, MunicipioAPI, VehiculoAPI } from '@/types/api'
 interface ConsultaFormProps {
   onSubmit: (payload: ConsultaRequestAPI) => Promise<void>;
   loading?: boolean;
+  municipioSeleccionadoId?: string;
+  onAbrirMapa?: () => void;
 }
 
-export default function ConsultaForm({ onSubmit, loading = false }: ConsultaFormProps) {
+export default function ConsultaForm({
+  onSubmit,
+  loading = false,
+  municipioSeleccionadoId,
+  onAbrirMapa,
+}: ConsultaFormProps) {
   const { user, isAdmin } = useAuth();
   const searchParams = useSearchParams();
   const [placa, setPlaca] = useState('');
   const [vehiculoSeleccionado, setVehiculoSeleccionado] = useState('');
-  const [municipioId, setMunicipioId] = useState('');
+  const [municipioId, setMunicipioId] = useState(municipioSeleccionadoId || '');
   const [municipios, setMunicipios] = useState<MunicipioAPI[]>([]);
   const [vehiculos, setVehiculos] = useState<VehiculoAPI[]>([]);
   const [cargaMunicipios, setCargaMunicipios] = useState(true);
@@ -30,9 +37,19 @@ export default function ConsultaForm({ onSubmit, loading = false }: ConsultaForm
   const [avisoMunicipios, setAvisoMunicipios] = useState<string | null>(null);
 
   useEffect(() => {
+    if (municipioSeleccionadoId) {
+      setMunicipioId(municipioSeleccionadoId);
+    }
+  }, [municipioSeleccionadoId]);
+
+  useEffect(() => {
     const placaUrl = searchParams.get('placa');
     if (placaUrl) {
       setPlaca(formatPlaca(placaUrl));
+    }
+    const munUrl = searchParams.get('municipio_id');
+    if (munUrl) {
+      setMunicipioId(munUrl);
     }
   }, [searchParams]);
 
@@ -181,9 +198,22 @@ export default function ConsultaForm({ onSubmit, loading = false }: ConsultaForm
       />
 
       <div className="space-y-1">
-        <label htmlFor="select-municipio" className="block text-sm font-medium text-gray-700">
-          Municipio
-        </label>
+        <div className="flex items-center justify-between">
+          <label htmlFor="select-municipio" className="block text-sm font-medium text-gray-700">
+            Municipio
+          </label>
+          {onAbrirMapa && (
+            <button
+              type="button"
+              id="btn-abrir-mapa-form"
+              onClick={onAbrirMapa}
+              className="text-xs font-semibold text-primary-700 hover:text-primary-900 flex items-center gap-1 hover:underline transition-colors"
+            >
+              <span>🗺️</span>
+              <span>Ver en mapa</span>
+            </button>
+          )}
+        </div>
         <select
           id="select-municipio"
           className="input-base"

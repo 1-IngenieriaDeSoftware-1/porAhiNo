@@ -8,6 +8,7 @@ import { ROUTES } from '@/lib/routes';
 
 const NAV_PUBLIC = [
   { href: ROUTES.consulta, label: 'Consultar', id: 'nav-consulta' },
+  { href: ROUTES.mapa, label: 'Mapa', id: 'nav-mapa' },
 ];
 
 export default function Navbar() {

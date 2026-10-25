@@ -3,6 +3,7 @@
 export const ROUTES = {
   home: '/',
   consulta: '/consulta',
+  mapa: '/mapa',
   vehiculos: '/vehiculos',
   alertas: '/alertas',
   admin: '/admin',

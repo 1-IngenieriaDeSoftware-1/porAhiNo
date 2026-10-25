@@ -8,6 +8,7 @@ import { ROUTES } from '@/lib/routes';
 import adminService from '@/services/adminService';
 import type { DecretoAPI, MunicipioAPI } from '@/types/api';
 import DecretoFormModal from '@/components/admin/DecretoFormModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 const NOMBRES_DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -32,6 +33,8 @@ export default function AdminPage() {
   // Modal de creación / edición
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [decretoSeleccionado, setDecretoSeleccionado] = useState<DecretoAPI | null>(null);
+  const [decretoADesactivar, setDecretoADesactivar] = useState<DecretoAPI | null>(null);
+  const [desactivando, setDesactivando] = useState(false);
 
   const cargarDatos = useCallback(async () => {
     if (!isAdmin) return;
@@ -66,18 +69,20 @@ export default function AdminPage() {
     setIsModalOpen(true);
   };
 
-  const handleDesactivar = async (decreto: DecretoAPI) => {
-    if (!window.confirm(`¿Deseas desactivar el decreto "${decreto.numero_decreto || decreto.id}"?`)) {
-      return;
-    }
+  const handleConfirmDesactivar = async () => {
+    if (!decretoADesactivar) return;
+    setDesactivando(true);
     try {
-      await adminService.eliminarDecreto(decreto.id);
+      await adminService.eliminarDecreto(decretoADesactivar.id);
       setDecretos((prev) =>
-        prev.map((d) => (d.id === decreto.id ? { ...d, is_active: false } : d))
+        prev.map((d) => (d.id === decretoADesactivar.id ? { ...d, is_active: false } : d)),
       );
+      setDecretoADesactivar(null);
       success('Decreto desactivado');
     } catch {
       toastError('Error al desactivar el decreto.');
+    } finally {
+      setDesactivando(false);
     }
   };
 
@@ -233,7 +238,7 @@ export default function AdminPage() {
                     </button>
                     {d.is_active && (
                       <button
-                        onClick={() => handleDesactivar(d)}
+                        onClick={() => setDecretoADesactivar(d)}
                         className="text-xs font-semibold text-red-600 hover:text-red-800 px-2 py-1 rounded hover:bg-red-50 transition-colors"
                         type="button"
                       >
@@ -248,13 +253,26 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Modal */}
       <DecretoFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleSuccessModal}
         decretoAEditar={decretoSeleccionado}
         municipios={municipios}
+      />
+
+      <ConfirmModal
+        isOpen={!!decretoADesactivar}
+        danger
+        loading={desactivando}
+        title="Desactivar decreto"
+        description={`¿Deseas desactivar el decreto "${decretoADesactivar?.numero_decreto || decretoADesactivar?.id}"? Dejará de aplicarse en las consultas.`}
+        confirmLabel="Desactivar"
+        cancelLabel="Cancelar"
+        onCancel={() => {
+          if (!desactivando) setDecretoADesactivar(null);
+        }}
+        onConfirm={handleConfirmDesactivar}
       />
     </main>
   );
