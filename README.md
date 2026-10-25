@@ -98,9 +98,14 @@ python -m scripts.seed_municipios
 python -m scripts.seed_decretos
 # BD local de pruebas: desactiva decretos viejos y carga rotación tipo Colombia 2026
 python -m scripts.seed_pruebas
+# Demo: 2 admins + 8 conductores (idempotente; US-DB-10 / Clever)
+python -m scripts.seed_demo_usuarios
 ```
 
-Admin de desarrollo: `admin@porahino.co` / `Admin1234`.
+Admin de desarrollo: `admin@porahino.co` / `Admin1234` (también `admin2@porahino.co`).  
+Conductores demo: `conductor1@porahino.co` … `conductor8@porahino.co` / `Conductor123`.
+
+PostgreSQL en Clever Cloud (US-DB-10 / #80): mapear `POSTGRESQL_ADDON_*` a `DATABASE_URL` (`postgresql+asyncpg://…`) y `DATABASE_URL_SYNC` (`postgresql://…`); ver comentarios en `backend/.env.example`.
 
 ### Frontend
 
