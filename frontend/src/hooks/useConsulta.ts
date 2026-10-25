@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
+import { apiErrorMessage } from '@/lib/utils';
 import consultaService from '@/services/consultaService';
 import type { ConsultaRequestAPI, ConsultaResponseAPI } from '@/types/api';
 
@@ -23,12 +24,15 @@ export function useConsulta(): UseConsultaReturn {
       const data = await consultaService.verificarRestriccion(payload);
       setResultado(data);
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string }; status?: number } };
-      const detail =
-        axiosErr.response?.status === 501
-          ? axiosErr.response.data?.detail || 'La consulta aún no está implementada en el backend (US-002).'
-          : axiosErr.response?.data?.detail || 'Error al consultar la restricción. Intenta de nuevo.';
-      toastError(detail);
+      const status = (err as { response?: { status?: number } }).response?.status;
+      toastError(
+        apiErrorMessage(
+          err,
+          status === 501
+            ? 'La consulta aún no está implementada en el backend (US-002).'
+            : 'Error al consultar la restricción. Intenta de nuevo.',
+        ),
+      );
       setResultado(null);
     } finally {
       setLoading(false);
