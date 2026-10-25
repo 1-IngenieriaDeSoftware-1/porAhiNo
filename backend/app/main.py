@@ -11,15 +11,19 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.core.config import settings
-from app.core.database import engine
+from app.core.database import AsyncSessionLocal, engine
 from app.core.exceptions import register_exception_handlers
 from app.routers import admin, auth, consulta, vehiculos
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    # Calienta el pool de Postgres para que la primera consulta no pague el cold start.
+    async with AsyncSessionLocal() as session:
+        await session.execute(text("SELECT 1"))
     yield
     await engine.dispose()
 

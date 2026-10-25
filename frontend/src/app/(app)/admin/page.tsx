@@ -115,8 +115,7 @@ export default function AdminPage() {
         <h1 className="text-3xl font-bold text-primary-700 mb-4">Panel de administración</h1>
         <div className="card space-y-3" role="alert">
           <p className="text-gray-600">
-            Debes iniciar sesión con una cuenta de administrador (JWT + rol admin) para usar este
-            panel (US-004.1).
+            Debes iniciar sesión con una cuenta de administrador para usar este panel.
           </p>
           <Link href={ROUTES.login} className="btn-primary inline-block" id="admin-login-link">
             Entrar como admin
@@ -150,7 +149,7 @@ export default function AdminPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary-700">Gestión de Decretos de Pico y Placa</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Administra el calendario, rangos horarios y dígitos vigentes por municipio (US-004)
+            Administra el calendario, rangos horarios y dígitos vigentes por municipio
           </p>
         </div>
         <button

@@ -10,7 +10,6 @@ export default function MapaPage() {
   const router = useRouter();
 
   const handleSeleccionar = (municipio: MunicipioAPI) => {
-    // Redirige al formulario de consulta con el municipio preseleccionado (flujo US-002/US-003)
     router.push(`${ROUTES.consulta}?municipio_id=${municipio.id}`);
   };
 
@@ -20,7 +19,7 @@ export default function MapaPage() {
         <MapaMunicipios
           onSeleccionarMunicipio={handleSeleccionar}
           titulo="Mapa de Municipios con Restricción"
-          subtitulo="Visualiza los municipios del territorio nacional con decreto de Pico y Placa vigente. Haz clic en un municipio para iniciar tu consulta de restricción vehicular (US-003.3)."
+          subtitulo="Visualiza los municipios con decreto de Pico y Placa vigente. Haz clic en un municipio para iniciar tu consulta."
         />
       </div>
     </main>

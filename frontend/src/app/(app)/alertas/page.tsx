@@ -11,8 +11,8 @@ export default function AlertasPage() {
       <h1 className="text-3xl font-bold text-primary-700 mb-4">Alertas preventivas</h1>
       <div className="card">
         <p className="text-gray-600">
-          US-005 (Could, Release 2). El modelo <code>alertas</code> ya está en el esquema de base de
-          datos; la lógica de notificaciones no forma parte del MVP.
+          Pronto podrás configurar recordatorios antes del Pico y Placa. Esta función aún no está
+          disponible en la versión actual.
         </p>
       </div>
     </main>
