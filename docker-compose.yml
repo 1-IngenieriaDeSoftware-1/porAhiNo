@@ -1,10 +1,16 @@
-# US-DB-08 — PostgreSQL 16 en Docker (solo desarrollo local).
-# Cuando el producto esté casi listo se despliega a un proveedor en la nube.
+# porAhiNo — stack local / demo (US-DB-08 + US-DB-11)
 #
-# Uso (raíz del repo, con Docker Desktop abierto):
-#   docker compose up -d
-#   docker compose ps          # db = healthy → 127.0.0.1:5432
-# Luego en /backend: python -m scripts.migrate && python -m scripts.check_db
+# Solo Postgres local (como antes):
+#   docker compose up -d db
+#
+# API + frontend (BD Clever u otra vía backend/.env — no hace falta `db`):
+#   docker compose up --build backend frontend
+#
+# Todo en Docker con Postgres local:
+#   # En backend/.env usa host `db` (no localhost); ver .env.example
+#   docker compose up --build
+#
+# Abrir Docker Desktop antes. Puertos en el host: 5432 (db), 8000 (API), 3000 (PWA).
 
 services:
   db:
@@ -26,6 +32,41 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: porAhiNo_api
+    restart: unless-stopped
+    ports:
+      - '8000:8000'
+    env_file:
+      - ./backend/.env
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8000/api/v1/health']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-porAhiNo}
+        NEXT_PUBLIC_APP_DESCRIPTION: "${NEXT_PUBLIC_APP_DESCRIPTION:-Consulta restricciones de Pico y Placa en Colombia}"
+    container_name: porAhiNo_web
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:
