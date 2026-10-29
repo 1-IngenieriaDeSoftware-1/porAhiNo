@@ -24,7 +24,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     # --- CORS ---
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+    ALLOWED_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://localhost",  # Capacitor Android (androidScheme)
+        "capacitor://localhost",
+        "http://localhost",
+    ]
 
     # --- Entorno ---
     ENVIRONMENT: str = "development"

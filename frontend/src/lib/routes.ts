@@ -4,6 +4,7 @@ export const ROUTES = {
   home: '/',
   consulta: '/consulta',
   mapa: '/mapa',
+  navegacion: '/navegacion',
   vehiculos: '/vehiculos',
   alertas: '/alertas',
   admin: '/admin',

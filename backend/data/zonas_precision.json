@@ -1,0 +1,60 @@
+{
+  "version": 3,
+  "descripcion": "Zonas CENTRO densificadas (no toda la ciudad). Así la ruta alternativa puede rodear por vías reales.",
+  "Bogotá": {
+    "nombre": "Bogotá — centro ampliado / expansión (restricción operativa demo)",
+    "descripcion": "Anillo densificado Chapinero–Centro–Teusaquillo–Los Mártires. Rutas N↔S pueden rodearlo por occidente (Boyacá/NQS) o oriente.",
+    "geometria": [
+      [-74.075, 4.675], [-74.068, 4.678], [-74.060, 4.680], [-74.052, 4.678],
+      [-74.045, 4.672], [-74.040, 4.662], [-74.038, 4.650], [-74.040, 4.638],
+      [-74.045, 4.628], [-74.052, 4.620], [-74.060, 4.615], [-74.070, 4.612],
+      [-74.080, 4.615], [-74.088, 4.622], [-74.092, 4.632], [-74.093, 4.645],
+      [-74.090, 4.658], [-74.085, 4.668], [-74.075, 4.675]
+    ],
+    "camaras": [
+      ["Autopista Norte cl. 100", 4.687, -74.056],
+      ["Av. Caracas cl. 72", 4.655, -74.063],
+      ["NQS cl. 68", 4.662, -74.086],
+      ["Calle 26 Av. El Dorado", 4.630, -74.094],
+      ["Av. Boyacá cl. 80", 4.688, -74.098],
+      ["Av. 68 con Av. Américas", 4.628, -74.115],
+      ["Calle 13 puente Aranda", 4.615, -74.100],
+      ["Av. Circunvalar cl. 45", 4.635, -74.045]
+    ]
+  },
+  "Medellín": {
+    "nombre": "Medellín — centro / La Candelaria ampliado",
+    "descripcion": "Polígono densificado del centro administrativo y corredores centrales.",
+    "geometria": [
+      [-75.580, 6.260], [-75.572, 6.262], [-75.565, 6.260], [-75.560, 6.255],
+      [-75.558, 6.248], [-75.560, 6.240], [-75.565, 6.235], [-75.572, 6.233],
+      [-75.580, 6.235], [-75.586, 6.240], [-75.588, 6.248], [-75.586, 6.255],
+      [-75.580, 6.260]
+    ],
+    "camaras": [
+      ["Av. El Poblado", 6.208, -75.567],
+      ["San Juan con Carrera 70", 6.247, -75.589],
+      ["Regional", 6.235, -75.575],
+      ["Av. Oriental", 6.251, -75.563],
+      ["Calle 10 El Poblado", 6.210, -75.570],
+      ["Autopista Sur", 6.195, -75.585]
+    ]
+  },
+  "Cali": {
+    "nombre": "Cali — centro / San Pedro ampliado",
+    "descripcion": "Polígono densificado del centro histórico y entorno inmediato.",
+    "geometria": [
+      [-76.540, 3.460], [-76.532, 3.462], [-76.525, 3.458], [-76.522, 3.450],
+      [-76.524, 3.442], [-76.530, 3.438], [-76.538, 3.438], [-76.544, 3.442],
+      [-76.546, 3.450], [-76.544, 3.456], [-76.540, 3.460]
+    ],
+    "camaras": [
+      ["Av. 3N", 3.465, -76.528],
+      ["Calle 5", 3.421, -76.540],
+      ["Simón Bolívar", 3.395, -76.545],
+      ["Av. Pasoancho", 3.405, -76.520],
+      ["Calle 13", 3.440, -76.535],
+      ["Autopista Suroriental", 3.390, -76.500]
+    ]
+  }
+}

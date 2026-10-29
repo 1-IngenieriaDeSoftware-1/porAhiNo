@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import AlertasPushPanel from '@/components/alertas/AlertasPushPanel';
 
 export const metadata: Metadata = {
   title: 'Alertas preventivas',
@@ -7,13 +8,19 @@ export const metadata: Metadata = {
 
 export default function AlertasPage() {
   return (
-    <main className="px-4 py-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-primary-700 mb-4">Alertas preventivas</h1>
-      <div className="card">
-        <p className="text-gray-600">
-          Pronto podrás configurar recordatorios antes del Pico y Placa. Esta función aún no está
-          disponible en la versión actual.
+    <main className="px-4 py-8 max-w-2xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-primary-700 mb-2">Alertas preventivas</h1>
+        <p className="text-ink-600 text-sm">
+          MainV2: avisos el día anterior si tu placa tiene restricción, con enlace a navegación
+          alternativa.
         </p>
+      </div>
+      <AlertasPushPanel />
+      <div className="card text-sm text-ink-600">
+        Tip: también puedes crear suscripciones por vehículo en el backend (`alertas` table). El job
+        `POST /api/v1/push/avisos-manana` (admin) revisa restricciones de mañana y envía push si VAPID
+        está configurado.
       </div>
     </main>
   );

@@ -32,6 +32,7 @@ porAhiNo/
 | Capa | Tecnología | Rol |
 |------|------------|-----|
 | Presentación | Next.js 14, TypeScript, Tailwind | UI, PWA, consumo de `/api/v1` |
+| Móvil | Capacitor 6 (Android) | Misma UI empaquetada; rama `feat/android-app` — ver [`docs/ANDROID.md`](docs/ANDROID.md) |
 | Aplicación | FastAPI, Pydantic | Validación, JWT, reglas de negocio |
 | Datos | PostgreSQL (Docker local o Clever) | Única persistencia; el frontend no habla con la BD |
 
@@ -133,6 +134,24 @@ npm run dev
 
 App: http://localhost:3000  
 Consulta en 2 clics: **Consultar restricción** → **Verificar estado**.
+
+### MainV2 (rama experimental — no mergear a main sin acuerdo)
+
+Navegación con motor de rutas propio + mapa MapLibre. Ver `docs/MAINV2.md`.
+
+```bash
+git checkout MainV2
+cd backend
+pip install -r requirements.txt
+python -m scripts.migrate
+python -m scripts.seed_mainv2   # zonas, cámaras, grafo BOG/MED/CAL
+uvicorn app.main:app --reload --port 8000
+
+cd ../frontend
+npm install   # incluye maplibre-gl
+npm run dev
+# http://localhost:3000/navegacion
+```
 
 ---
 

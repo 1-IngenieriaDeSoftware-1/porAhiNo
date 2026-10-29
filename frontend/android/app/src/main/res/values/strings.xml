@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">porAhiNo</string>
+    <string name="title_activity_main">porAhiNo</string>
+    <string name="package_name">co.porahino.app</string>
+    <string name="custom_url_scheme">co.porahino.app</string>
+</resources>

@@ -82,3 +82,14 @@ backend/alembic/versions/*.pyc
 # ---- PWA ----
 public/sw.js
 public/workbox-*.js
+
+# ---- Capacitor / Android ----
+frontend/android/.gradle/
+frontend/android/app/build/
+frontend/android/build/
+frontend/android/local.properties
+frontend/android/captures/
+*.apk
+*.aab
+*.keystore
+*.jks

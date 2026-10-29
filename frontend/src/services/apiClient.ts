@@ -8,7 +8,8 @@ import { TOKEN_STORAGE_KEY } from '@/lib/routes';
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
-  timeout: 10000,
+  // OSRM + desvíos por corredor pueden superar 30s en red pública
+  timeout: Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 60000),
   headers: {
     'Content-Type': 'application/json',
   },

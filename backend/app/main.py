@@ -16,7 +16,7 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal, engine
 from app.core.exceptions import register_exception_handlers
-from app.routers import admin, auth, consulta, vehiculos
+from app.routers import admin, auth, consulta, push, rutas, vehiculos
 
 
 @asynccontextmanager
@@ -51,6 +51,8 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(vehiculos.router, prefix="/api/v1/vehiculos", tags=["vehiculos"])
 app.include_router(consulta.router, prefix="/api/v1/consulta", tags=["consulta"])
 app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
+app.include_router(rutas.router, prefix="/api/v1/rutas", tags=["rutas-mainv2"])
+app.include_router(push.router, prefix="/api/v1/push", tags=["push-mainv2"])
 
 
 @app.get("/", tags=["health"])

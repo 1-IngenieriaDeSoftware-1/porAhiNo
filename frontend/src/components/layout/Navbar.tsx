@@ -9,6 +9,7 @@ import { ROUTES } from '@/lib/routes';
 const NAV_PUBLIC = [
   { href: ROUTES.consulta, label: 'Consultar', id: 'nav-consulta' },
   { href: ROUTES.mapa, label: 'Mapa', id: 'nav-mapa' },
+  { href: ROUTES.navegacion, label: 'Navegación', id: 'nav-navegacion' },
 ];
 
 export default function Navbar() {
@@ -18,7 +19,12 @@ export default function Navbar() {
 
   const links = [
     ...NAV_PUBLIC,
-    ...(user && !isAdmin ? [{ href: ROUTES.vehiculos, label: 'Mis vehículos', id: 'nav-vehiculos' }] : []),
+    ...(user && !isAdmin
+      ? [
+          { href: ROUTES.vehiculos, label: 'Mis vehículos', id: 'nav-vehiculos' },
+          { href: ROUTES.alertas, label: 'Alertas', id: 'nav-alertas' },
+        ]
+      : []),
     ...(isAdmin ? [{ href: ROUTES.admin, label: 'Admin', id: 'nav-admin' }] : []),
   ];
 

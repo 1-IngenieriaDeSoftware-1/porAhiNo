@@ -1,39 +1,46 @@
 /** @type {import('next').NextConfig} */
+const isCapacitor = process.env.CAPACITOR_BUILD === '1';
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  // Deshabilitar PWA en desarrollo para evitar conflictos con hot reload
-  disable: process.env.NODE_ENV === 'development',
+  // PWA en web; en Capacitor el shell nativo ya es “installable”
+  disable: process.env.NODE_ENV === 'development' || isCapacitor,
   buildExcludes: [/middleware-manifest\.json$/],
 });
 
 const nextConfig = {
   reactStrictMode: true,
-  // Imagen Docker / deploy (US-DB-11): `next start` standalone
-  output: 'standalone',
-  // Optimización de imágenes
+  // Docker/web: standalone | Android (Capacitor): export estático → out/
+  output: isCapacitor ? 'export' : 'standalone',
   images: {
     remotePatterns: [],
+    unoptimized: isCapacitor,
   },
-  // Headers de seguridad
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          // Protección XSS
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
-          // HTTPS obligatorio (TLS 1.3 en producción via Vercel)
-          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-          // Referrer policy (privacidad Ley 1581)
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        ],
-      },
-    ];
-  },
+  ...(isCapacitor
+    ? {
+        trailingSlash: true,
+      }
+    : {
+        async headers() {
+          return [
+            {
+              source: '/(.*)',
+              headers: [
+                { key: 'X-Content-Type-Options', value: 'nosniff' },
+                { key: 'X-Frame-Options', value: 'DENY' },
+                { key: 'X-XSS-Protection', value: '1; mode=block' },
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=31536000; includeSubDomains',
+                },
+                { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+              ],
+            },
+          ];
+        },
+      }),
 };
 
 module.exports = withPWA(nextConfig);
