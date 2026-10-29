@@ -26,14 +26,14 @@ porAhiNo/
 ├── frontend/          Next.js 14 PWA (App Router)
 ├── backend/           FastAPI + SQLAlchemy async
 ├── docs/              Arquitectura y cambios de estructura
-└── docker-compose.yml PostgreSQL 16 local
+└── docker-compose.yml db + API + frontend (US-DB-11)
 ```
 
 | Capa | Tecnología | Rol |
 |------|------------|-----|
 | Presentación | Next.js 14, TypeScript, Tailwind | UI, PWA, consumo de `/api/v1` |
 | Aplicación | FastAPI, Pydantic | Validación, JWT, reglas de negocio |
-| Datos | PostgreSQL | Única persistencia; el frontend no habla con la BD |
+| Datos | PostgreSQL (Docker local o Clever) | Única persistencia; el frontend no habla con la BD |
 
 Flujos del SRS:
 
@@ -52,62 +52,77 @@ La consulta (US-002) es **pública**. Guardar vehículos y administrar decretos 
 
 ## Arranque local
 
-**Requisitos:** Node.js 18+, Python 3.11+, Docker Desktop, Git.
+**Requisitos:** Docker Desktop + Git.  
+Para desarrollo sin contenedores de app: también Node.js 18+ y Python 3.11+.
 
-La base de datos **solo corre en un contenedor local** (US-DB-08). No hay Postgres en la nube todavía: se desplegará cuando el producto esté casi listo.
+Hay **dos caminos** (US-DB-11). El recomendado para el equipo en demo es **Docker + Postgres Clever**.
+
+### Opción A — Todo con Docker (recomendado para compañeros)
 
 ```bash
 git clone https://github.com/1-IngenieriaDeSoftware-1/porAhiNo.git
 cd porAhiNo
 
-# 1) Abrir Docker Desktop y esperar a que quede en marcha
-# 2) Levantar Postgres 16 (solo localhost:5432)
-docker compose up -d
-docker compose ps   # el servicio db debe verse healthy
+# 1) Copiar env del backend y pegar credenciales Clever (canal privado del equipo)
+cp backend/.env.example backend/.env
+# Editar DATABASE_URL / DATABASE_URL_SYNC → Clever (?ssl=require / ?sslmode=require)
+# Ver comentarios en backend/.env.example (opción C). NO subir .env al git.
+
+# 2) Docker Desktop abierto → API + PWA
+docker compose up --build backend frontend
 ```
 
-PostgreSQL queda en `127.0.0.1:5432` (usuario `porAhiNo_user`, clave `porAhiNo_pass`, bd `porAhiNo_db`).  
-Bajar el contenedor sin borrar datos: `docker compose stop`. Con volumen: `docker compose down` (el volumen `postgres_data` se conserva salvo `down -v`).
+- App: http://localhost:3000  
+- API / OpenAPI: http://localhost:8000 · http://localhost:8000/docs  
 
-### Backend
+No hace falta levantar el servicio `db` si usáis Clever.  
+Clever DEV tiene pocas conexiones: no abráis muchos backends a la vez.
+
+**Postgres solo local** (opcional): `docker compose up -d db`, y en `.env` usad host `localhost` (venv) o `db` (si el backend también va en Compose). Luego migrate/seed como abajo.
+
+### Opción B — Backend/frontend en el host (venv + npm)
+
+```bash
+git clone https://github.com/1-IngenieriaDeSoftware-1/porAhiNo.git
+cd porAhiNo
+
+# Postgres local (si no usáis Clever)
+docker compose up -d db
+docker compose ps   # db = healthy → 127.0.0.1:5432
+```
+
+PostgreSQL local: usuario `porAhiNo_user`, clave `porAhiNo_pass`, bd `porAhiNo_db`.  
+Parar: `docker compose stop`. Con volumen: `docker compose down` (salvo `down -v`).
+
+#### Backend
 
 ```bash
 cd backend
-cp .env.example .env
+cp .env.example .env   # Clever o localhost; ver .env.example
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 
-# US-DB-01 / US-DB-08 — esquema contra el contenedor
+# Solo si la BD está vacía (local). En Clever demo ya migrado/sembrado — no repetir sin acuerdo.
 python -m scripts.migrate
 python -m scripts.check_db
-# equivalente: alembic upgrade head
-# revertir: alembic downgrade base
 
 uvicorn app.main:app --reload --port 8000
 ```
 
-- API: http://localhost:8000  
-- OpenAPI: http://localhost:8000/docs  
-
 ```bash
-# US-DB-02 — catálogo Bogotá / Medellín / Cali (idempotente)
+# Seeds (idempotentes; preferible en BD local)
 python -m scripts.seed_municipios
-# US-DB-03 — decretos de ejemplo (horas, dígitos, vigencia; idempotente)
 python -m scripts.seed_decretos
-# BD local de pruebas: desactiva decretos viejos y carga rotación tipo Colombia 2026
 python -m scripts.seed_pruebas
-# Demo: 2 admins + 8 conductores (idempotente; US-DB-10 / Clever)
 python -m scripts.seed_demo_usuarios
 ```
 
-Admin de desarrollo: `admin@porahino.co` / `Admin1234` (también `admin2@porahino.co`).  
-Conductores demo: `conductor1@porahino.co` … `conductor8@porahino.co` / `Conductor123`.
+Admin demo: `admin@porahino.co` / `Admin1234` (también `admin2@porahino.co`).  
+Conductores: `conductor1@porahino.co` … `conductor8@porahino.co` / `Conductor123`.
 
-PostgreSQL en Clever Cloud (US-DB-10 / #80): mapear `POSTGRESQL_ADDON_*` a `DATABASE_URL` (`postgresql+asyncpg://…`) y `DATABASE_URL_SYNC` (`postgresql://…`); ver comentarios en `backend/.env.example`.
-
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
@@ -117,7 +132,7 @@ npm run dev
 ```
 
 App: http://localhost:3000  
-Consulta en 2 clics desde home: **Consultar restricción** → **Verificar estado**.
+Consulta en 2 clics: **Consultar restricción** → **Verificar estado**.
 
 ---
 
