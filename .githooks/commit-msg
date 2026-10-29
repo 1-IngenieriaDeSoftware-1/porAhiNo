@@ -1,5 +1,15 @@
 #!/bin/sh
-# Quita trailers de atribución de Cursor para que no figure como contribuyente.
-tmpfile="$1.tmp"
-grep -viE '^(co-authored-by:[[:space:]]*cursor|made-with:[[:space:]]*cursor)' "$1" > "$tmpfile" && mv "$tmpfile" "$1"
+# Elimina trailers de atribución de Cursor para que no figure como contribuyente en GitHub.
+# Activo vía: git config core.hooksPath .githooks
+set -e
+msgfile="$1"
+tmpfile="$1.porahino.tmp"
+# Compatible con Git Bash / sh en Windows
+grep -viE '^[[:space:]]*(Co-authored-by|Made-with|Generated-by)[[:space:]]*:[[:space:]]*Cursor\b' "$msgfile" > "$tmpfile" || true
+# Si grep no dejó nada útil, no destruir el mensaje
+if [ -s "$tmpfile" ]; then
+  mv "$tmpfile" "$msgfile"
+else
+  rm -f "$tmpfile"
+fi
 exit 0

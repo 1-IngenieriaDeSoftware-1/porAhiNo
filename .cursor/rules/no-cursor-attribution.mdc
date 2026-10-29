@@ -1,0 +1,10 @@
+---
+description: Nunca atribuir commits a Cursor ni añadir trailers de coautoría
+alwaysApply: true
+---
+
+# Sin atribución de Cursor
+
+- Nunca añadir `Co-authored-by: Cursor`, `Made-with: Cursor`, ni trailers similares a commits, PRs o mensajes.
+- No mencionar Cursor como contribuyente en README, CHANGELOG ni metadatos del repo.
+- Al hacer `git commit`, usar solo el mensaje del cambio; el hook `.githooks/commit-msg` debe seguir activo (`core.hooksPath=.githooks`).
