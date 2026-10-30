@@ -146,20 +146,33 @@ export default function NavegacionMap() {
   }, [municipioId, paintLayers, resultado?.rutas]);
 
   useEffect(() => {
-    consultaService.getMunicipios().then((m: MunicipioAPI[]) => {
-      setMunicipios(m);
-      if (m.length && !m.find((x: MunicipioAPI) => x.id === municipioId)) {
-        setMunicipioId(m[0].id);
-      }
-    });
-  }, [municipioId]);
+    let cancelled = false;
+    consultaService
+      .getMunicipios()
+      .then((m: MunicipioAPI[]) => {
+        if (cancelled) return;
+        setMunicipios(m);
+        if (m.length) {
+          setMunicipioId((prev) => (m.some((x) => x.id === prev) ? prev : m[0].id));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(apiErrorMessage(err, 'No se pudieron cargar los municipios'));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const center = CITY_CENTER[municipioId] || [-74.08, 4.65];
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
+      // Estilo con sprite completo; liberty a veces pide iconos ausentes
+      style: 'https://tiles.openfreemap.org/styles/bright',
       center,
       zoom: 11,
     });
@@ -171,6 +184,15 @@ export default function NavegacionMap() {
       }),
       'top-right',
     );
+    // Evita spam de "Image X could not be loaded" si el estilo pide iconos faltantes
+    const missing = new Set<string>();
+    map.on('styleimagemissing', (e) => {
+      const id = e.id;
+      if (!id || missing.has(id) || map.hasImage(id)) return;
+      missing.add(id);
+      const data = new Uint8Array([0, 0, 0, 0]);
+      map.addImage(id, { width: 1, height: 1, data }, { pixelRatio: 1 });
+    });
     map.on('load', () => {
       loadCapas();
     });
