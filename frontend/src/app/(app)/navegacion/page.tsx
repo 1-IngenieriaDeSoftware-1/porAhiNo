@@ -22,9 +22,10 @@ export default function NavegacionPage() {
         <p className="text-xs uppercase tracking-wide text-primary-600 font-semibold">MainV2 experimental</p>
         <h1 className="text-3xl font-bold text-primary-800">Navegación con Pico y Placa</h1>
         <p className="text-ink-600 mt-1 max-w-2xl">
-          Rutas por vías reales (OSRM) con desvío por corredores laterales. Marca origen y destino
-          en el mismo municipio; si tu placa está restringida, verás la alternativa que evita la
-          zona.
+          Rutas por vías reales (Valhalla) con desvío por corredores laterales y recálculo en ruta con
+          GPS. Marca origen y destino en el mismo municipio; si tu placa está restringida, verás la
+          alternativa que evita la zona. Los avisos de cámaras y semáforos son solo informativos y de
+          apoyo a la conducción prudente.
         </p>
       </header>
       <NavegacionMap />

@@ -24,10 +24,20 @@ function resolveApiBaseUrl(): string {
   return 'http://localhost:8000/api/v1';
 }
 
+/** Timeout global (ms). Configurable con NEXT_PUBLIC_API_TIMEOUT_MS. */
+export const API_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 60000);
+
+/**
+ * Timeout (ms) para recálculos en ruta (POST /rutas/ durante la navegación).
+ * Más corto que el global: si Valhalla tarda, mejor reintentar tras el cooldown.
+ * Configurable con NEXT_PUBLIC_RECALC_TIMEOUT_MS.
+ */
+export const RECALC_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_RECALC_TIMEOUT_MS || 10000);
+
 const apiClient = axios.create({
   baseURL: resolveApiBaseUrl(),
-  // OSRM + desvíos por corredor pueden superar 30s en red pública
-  timeout: Number(process.env.NEXT_PUBLIC_API_TIMEOUT_MS || 60000),
+  // Cálculo inicial con desvíos por corredor puede ser lento en red pública
+  timeout: API_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
   },
