@@ -36,7 +36,7 @@ export const RECALC_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_RECALC_TIMEOUT_M
 
 const apiClient = axios.create({
   baseURL: resolveApiBaseUrl(),
-  // Cálculo inicial con desvíos por corredor puede ser lento en red pública
+  // Cálculo inicial (Valhalla + alternativa) puede superar unos segundos
   timeout: API_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
