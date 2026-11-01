@@ -29,11 +29,18 @@ from app.services.routing_engine import haversine_m
 
 ZONAS_PATH = BACKEND_DIR / "data" / "zonas_precision.json"
 
-# Grids de fallback Dijkstra (bbox alineado a polígonos precisos)
+# Grids de fallback Dijkstra (bbox del grafo, más denso que el operativo)
 CITY_GRIDS = {
     "Bogotá": {"bbox": (4.55, 4.78, -74.18, -74.01), "rows": 9, "cols": 9},
     "Medellín": {"bbox": (6.18, 6.32, -75.63, -75.51), "rows": 8, "cols": 8},
     "Cali": {"bbox": (3.38, 3.51, -76.59, -76.47), "rows": 8, "cols": 8},
+}
+
+# Bbox operativo data-driven (validación origen/destino). Medellín = Valle de Aburrá.
+OPERATIONAL_BBOX = {
+    "Medellín": (6.05, 6.55, -75.75, -75.40),
+    "Bogotá": (4.45, 4.85, -74.25, -73.95),
+    "Cali": (3.30, 3.55, -76.65, -76.45),
 }
 
 
@@ -53,6 +60,10 @@ async def seed_ciudad(db: AsyncSession, mun: Municipio, grid_cfg: dict, zona_cfg
     await db.execute(delete(ZonaRestriccion).where(ZonaRestriccion.municipio_id == mun.id))
     await db.execute(delete(Camara).where(Camara.municipio_id == mun.id))
     await db.flush()
+
+    op_bbox = OPERATIONAL_BBOX.get(mun.nombre)
+    if op_bbox:
+        mun.bbox_lat_min, mun.bbox_lat_max, mun.bbox_lon_min, mun.bbox_lon_max = op_bbox
 
     lat_min, lat_max, lon_min, lon_max = grid_cfg["bbox"]
     rows, cols = grid_cfg["rows"], grid_cfg["cols"]

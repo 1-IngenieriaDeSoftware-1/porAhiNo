@@ -10,9 +10,36 @@
 #   # En backend/.env usa host `db` (no localhost); ver .env.example
 #   docker compose up --build
 #
-# Abrir Docker Desktop antes. Puertos en el host: 5432 (db), 8000 (API), 3000 (PWA).
+# Abrir Docker Desktop antes. Puertos: 5432 (db), 8000 (API), 3000 (PWA), 8002 (Valhalla).
+# Valhalla (tiles Valle de Aburrá): ver docs/VALHALLA.md
 
 services:
+  valhalla:
+    image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
+    container_name: porAhiNo_valhalla
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8002:8002'
+    environment:
+      # Extracto Colombia recortado al Valle de Aburrá (por defecto).
+      # Para Colombia completa: usar tile_urls de Geofabrik colombia-latest.osm.pbf
+      # y documentar el rebuild en docs/VALHALLA.md (mucho más disco/RAM).
+      tile_urls: ${VALHALLA_TILE_URL:-https://download.geofabrik.de/south-america/colombia-latest.osm.pbf}
+      use_tiles_ignore_pbf: 'True'
+      serve_tiles: 'True'
+      force_rebuild: 'False'
+      # Bounding box Valle de Aburrá (lon_min,lat_min,lon_max,lat_max)
+      # Recorta el PBF de Colombia al área operativa de Medellín/Aburrá.
+      bounding_box: ${VALHALLA_BBOX:--75.75,6.05,-75.40,6.55}
+    volumes:
+      - valhalla_data:/custom_files
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1:8002/status || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
   db:
     image: postgres:16-alpine
     container_name: porAhiNo_db
@@ -70,4 +97,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  valhalla_data:
     driver: local

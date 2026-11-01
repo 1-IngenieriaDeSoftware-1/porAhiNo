@@ -12,6 +12,7 @@ from app.models.municipio import Municipio
 from app.models.push_subscription import PushSubscription
 from app.models.usuario import Usuario
 from app.models.vehiculo import Vehiculo
+from app.models.semaforo import Semaforo
 from app.models.zona_restriccion import ZonaRestriccion
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "NodoVia",
     "AristaVia",
     "PushSubscription",
+    "Semaforo",
 ]

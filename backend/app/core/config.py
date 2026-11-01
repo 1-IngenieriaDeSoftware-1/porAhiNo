@@ -36,6 +36,17 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
+    # --- Ruteo Valhalla (MainV2) ---
+    VALHALLA_BASE_URL: str = "http://127.0.0.1:8002"
+    VALHALLA_TIMEOUT_S: float = 12.0
+    # Cruce zona: 0.0 = cualquier intersección invalida la alternativa
+    ROUTING_CRUCE_FRAC_MAX: float = 0.0
+    # Desvío máximo vs duración directa
+    ROUTING_MAX_DETOR_FACTOR: float = 1.8
+    # GPS cliente (documentado; el FE también tiene defaults)
+    GPS_MAX_ACCURACY_M: float = 40.0
+    GPS_OFF_ROUTE_M: float = 40.0
+
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
     def parse_origins(cls, value: object) -> list[str]:

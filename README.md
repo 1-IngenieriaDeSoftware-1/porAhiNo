@@ -26,7 +26,7 @@ porAhiNo/
 ├── frontend/          Next.js 14 PWA (App Router)
 ├── backend/           FastAPI + SQLAlchemy async
 ├── docs/              Arquitectura y cambios de estructura
-└── docker-compose.yml db + API + frontend (US-DB-11)
+└── docker-compose.yml db + API + frontend + Valhalla (MainV2)
 ```
 
 | Capa | Tecnología | Rol |
