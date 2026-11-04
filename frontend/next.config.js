@@ -10,6 +10,8 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   reactStrictMode: true,
+  // Imagen Docker: salida standalone para `node server.js`
+  output: 'standalone',
   // Optimización de imágenes
   images: {
     remotePatterns: [],

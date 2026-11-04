@@ -1,0 +1,937 @@
+openapi: 3.0.3
+info:
+  title: porAhiNo API
+  description: API REST para consulta de Pico y Placa en Colombia.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Docker Compose / desarrollo local
+tags:
+  - name: health
+  - name: auth
+  - name: consulta
+  - name: vehiculos
+  - name: admin
+paths:
+  /:
+    get:
+      tags: [health]
+      summary: Root
+      operationId: root
+      responses:
+        '200':
+          description: Servicio activo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RootResponse'
+
+  /api/v1/health:
+    get:
+      tags: [health]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API saludable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/auth/register:
+    post:
+      tags: [auth]
+      summary: Registrar conductor
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioCreate'
+      responses:
+        '201':
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '409':
+          description: Correo ya registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Iniciar sesión (JWT)
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token emitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: Perfil del usuario autenticado
+      operationId: getMe
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Perfil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+
+  /api/v1/consulta/:
+    post:
+      tags: [consulta]
+      summary: Consultar restricción de Pico y Placa (US-002)
+      operationId: consultarRestriccion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultaRequest'
+      responses:
+        '200':
+          description: Resultado de la consulta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultaResponse'
+        '404':
+          description: Municipio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Placa u otros campos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/consulta/municipios:
+    get:
+      tags: [consulta]
+      summary: Listar municipios con decreto activo (US-003)
+      operationId: listarMunicipios
+      responses:
+        '200':
+          description: Catálogo de municipios activos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MunicipioResponse'
+
+  /api/v1/vehiculos/:
+    get:
+      tags: [vehiculos]
+      summary: Listar vehículos del conductor (US-001 / US-006)
+      operationId: listarVehiculos
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de vehículos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehiculoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+    post:
+      tags: [vehiculos]
+      summary: Registrar vehículo
+      operationId: crearVehiculo
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehiculoCreate'
+      responses:
+        '201':
+          description: Vehículo creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehiculoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '409':
+          description: Placa duplicada para el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/vehiculos/{vehiculo_id}:
+    get:
+      tags: [vehiculos]
+      summary: Obtener vehículo por id
+      operationId: obtenerVehiculo
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/VehiculoId'
+      responses:
+        '200':
+          description: Vehículo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehiculoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '404':
+          description: No encontrado o no pertenece al usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+    put:
+      tags: [vehiculos]
+      summary: Actualizar vehículo
+      operationId: actualizarVehiculo
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/VehiculoId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehiculoUpdate'
+      responses:
+        '200':
+          description: Vehículo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehiculoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags: [vehiculos]
+      summary: Eliminar vehículo
+      operationId: eliminarVehiculo
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/VehiculoId'
+      responses:
+        '204':
+          description: Eliminado
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+
+  /api/v1/admin/decretos:
+    get:
+      tags: [admin]
+      summary: Listar decretos (US-004)
+      operationId: listarDecretos
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de decretos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DecretoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+    post:
+      tags: [admin]
+      summary: Crear decreto
+      operationId: crearDecreto
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecretoCreate'
+      responses:
+        '201':
+          description: Decreto creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecretoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/admin/decretos/{decreto_id}:
+    get:
+      tags: [admin]
+      summary: Obtener decreto por id
+      operationId: obtenerDecreto
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DecretoId'
+      responses:
+        '200':
+          description: Decreto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecretoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '404':
+          description: Decreto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+    put:
+      tags: [admin]
+      summary: Actualizar decreto
+      operationId: actualizarDecreto
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DecretoId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecretoUpdate'
+      responses:
+        '200':
+          description: Decreto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecretoResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '404':
+          description: Decreto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags: [admin]
+      summary: Eliminar (desactivar) decreto
+      operationId: eliminarDecreto
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/DecretoId'
+      responses:
+        '204':
+          description: Eliminado
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '404':
+          description: Decreto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+
+  /api/v1/admin/municipios:
+    get:
+      tags: [admin]
+      summary: Listar municipios (admin)
+      operationId: listarMunicipiosAdmin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Catálogo completo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MunicipioResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+    post:
+      tags: [admin]
+      summary: Crear municipio
+      operationId: crearMunicipio
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MunicipioCreate'
+      responses:
+        '201':
+          description: Municipio creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MunicipioResponse'
+        '401':
+          description: Sin token o token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '403':
+          description: Requiere rol admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '409':
+          description: Municipio duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDetail'
+        '422':
+          description: Validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT obtenido en POST /api/v1/auth/login
+
+  parameters:
+    VehiculoId:
+      name: vehiculo_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    DecretoId:
+      name: decreto_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  schemas:
+    RootResponse:
+      type: object
+      required: [status, service, version]
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: porAhiNo API
+        version:
+          type: string
+          example: 1.0.0
+
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: healthy
+
+    ErrorDetail:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+
+    ValidationError:
+      type: object
+      properties:
+        loc:
+          type: array
+          items: {}
+        msg:
+          type: string
+        type:
+          type: string
+
+    HTTPValidationError:
+      type: object
+      properties:
+        detail:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                $ref: '#/components/schemas/ValidationError'
+
+    RolUsuario:
+      type: string
+      enum: [conductor, admin]
+
+    TipoVehiculo:
+      type: string
+      enum: [particular, taxi, moto, carga, publico]
+
+    UsuarioCreate:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+          default: conductor
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    TokenResponse:
+      type: object
+      required: [access_token, token_type, expires_in]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+        expires_in:
+          type: integer
+          description: Segundos de vigencia del token
+
+    UsuarioResponse:
+      type: object
+      required: [id, email, rol, is_active, created_at]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    ConsultaRequest:
+      type: object
+      required: [placa, municipio_id]
+      properties:
+        placa:
+          type: string
+          description: Placa colombiana ABC123 o ABC12D
+          example: ABC123
+        municipio_id:
+          type: integer
+        fecha_hora:
+          type: string
+          format: date-time
+          nullable: true
+
+    RestriccionDetalle:
+      type: object
+      required: [decreto_id, hora_inicio, hora_fin, dias_restriccion, digitos_restringidos]
+      properties:
+        decreto_id:
+          type: integer
+        hora_inicio:
+          type: string
+        hora_fin:
+          type: string
+        dias_restriccion:
+          type: array
+          items:
+            type: integer
+        digitos_restringidos:
+          type: array
+          items:
+            type: string
+        descripcion:
+          type: string
+          nullable: true
+
+    ConsultaResponse:
+      type: object
+      required: [placa, municipio, fecha_hora_consultada, tiene_restriccion, mensaje]
+      properties:
+        placa:
+          type: string
+        municipio:
+          type: string
+        fecha_hora_consultada:
+          type: string
+          format: date-time
+        tiene_restriccion:
+          type: boolean
+        detalle:
+          allOf:
+            - $ref: '#/components/schemas/RestriccionDetalle'
+          nullable: true
+        mensaje:
+          type: string
+
+    VehiculoCreate:
+      type: object
+      required: [placa]
+      properties:
+        placa:
+          type: string
+          example: ABC123
+        tipo:
+          $ref: '#/components/schemas/TipoVehiculo'
+        alias:
+          type: string
+          nullable: true
+
+    VehiculoUpdate:
+      type: object
+      properties:
+        alias:
+          type: string
+          nullable: true
+        tipo:
+          $ref: '#/components/schemas/TipoVehiculo'
+
+    VehiculoResponse:
+      type: object
+      required: [id, placa, tipo, id_usuario, created_at]
+      properties:
+        id:
+          type: integer
+        placa:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoVehiculo'
+        alias:
+          type: string
+          nullable: true
+        id_usuario:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    DecretoCreate:
+      type: object
+      required:
+        - municipio_id
+        - hora_inicio
+        - hora_fin
+        - dias_restriccion
+        - digitos_restringidos
+        - vigencia_desde
+      properties:
+        municipio_id:
+          type: integer
+        numero_decreto:
+          type: string
+          nullable: true
+        descripcion:
+          type: string
+          nullable: true
+        hora_inicio:
+          type: string
+          format: time
+          example: '05:00:00'
+        hora_fin:
+          type: string
+          format: time
+          example: '20:00:00'
+        dias_restriccion:
+          type: string
+          description: '0=Lunes … 6=Domingo, ej. "0,1,2,3,4"'
+          example: '0,1,2,3,4'
+        digitos_restringidos:
+          type: string
+          example: '1,2'
+        vigencia_desde:
+          type: string
+          format: date
+        vigencia_hasta:
+          type: string
+          format: date
+          nullable: true
+
+    DecretoUpdate:
+      type: object
+      properties:
+        descripcion:
+          type: string
+          nullable: true
+        hora_inicio:
+          type: string
+          format: time
+        hora_fin:
+          type: string
+          format: time
+        dias_restriccion:
+          type: string
+        digitos_restringidos:
+          type: string
+        vigencia_hasta:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+
+    DecretoResponse:
+      type: object
+      required:
+        - id
+        - municipio_id
+        - hora_inicio
+        - hora_fin
+        - dias_restriccion
+        - digitos_restringidos
+        - vigencia_desde
+        - is_active
+      properties:
+        id:
+          type: integer
+        municipio_id:
+          type: integer
+        numero_decreto:
+          type: string
+          nullable: true
+        descripcion:
+          type: string
+          nullable: true
+        hora_inicio:
+          type: string
+          format: time
+        hora_fin:
+          type: string
+          format: time
+        dias_restriccion:
+          type: string
+        digitos_restringidos:
+          type: string
+        vigencia_desde:
+          type: string
+          format: date
+        vigencia_hasta:
+          type: string
+          format: date
+          nullable: true
+        is_active:
+          type: boolean
+
+    MunicipioCreate:
+      type: object
+      required: [nombre, departamento]
+      properties:
+        nombre:
+          type: string
+          minLength: 2
+          maxLength: 100
+        departamento:
+          type: string
+          minLength: 2
+          maxLength: 100
+        codigo_dane:
+          type: string
+          maxLength: 10
+          nullable: true
+
+    MunicipioResponse:
+      type: object
+      required: [id, nombre, departamento]
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        departamento:
+          type: string
+        codigo_dane:
+          type: string
+          nullable: true
